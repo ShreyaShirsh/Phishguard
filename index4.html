@@ -1,0 +1,1335 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhishGuard - Trust Exploration Simulator</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Red+Hat+Display:wght@400;500;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --cyber-black: #0a0e17;
+            --cyber-blue: #00d9ff;
+            --cyber-red: #ff0055;
+            --cyber-purple: #9945ff;
+            --cyber-green: #00ff88;
+            --cyber-yellow: #ffdd00;
+            --cyber-gray: #1a1f2e;
+            --cyber-white: #e8f4f8;
+            --warning-orange: #ff6b35;
+            --danger-glow: rgba(255, 0, 85, 0.4);
+            --safe-glow: rgba(0, 255, 136, 0.4);
+        }
+
+        body {
+            font-family: 'Red Hat Display', sans-serif;
+            background: var(--cyber-black);
+            color: var(--cyber-white);
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .cyber-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                linear-gradient(rgba(0, 217, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 217, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridScroll 20s linear infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes gridScroll {
+            0% {
+                transform: translateY(0);
+            }
+
+            100% {
+                transform: translateY(50px);
+            }
+        }
+
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom,
+                    rgba(0, 217, 255, 0.02) 50%,
+                    transparent 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.5;
+        }
+
+        #welcomePage {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 2;
+            opacity: 1;
+            transition: opacity 0.5s ease;
+        }
+
+        #welcomePage.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .logo-container {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: glitchIn 1s ease-out;
+        }
+
+        .project-title {
+            margin: 150px;
+            padding: 10px;
+        }
+
+        @keyframes glitchIn {
+            0% {
+                opacity: 0;
+                transform: translateY(-30px) scale(0.9);
+                filter: blur(10px);
+            }
+
+            50% {
+                transform: translateY(5px) scale(1.05);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+                filter: blur(0);
+            }
+        }
+
+        .project-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--cyber-blue), var(--cyber-purple), var(--cyber-red));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 40px rgba(0, 217, 255, 0.5);
+            letter-spacing: 0.1em;
+            margin-bottom: 1rem;
+            position: relative;
+            animation: titlePulse 3s ease-in-out infinite;
+        }
+
+        @keyframes titlePulse {
+
+            0%,
+            100% {
+                filter: brightness(1);
+            }
+
+            50% {
+                filter: brightness(1.2);
+            }
+        }
+
+        .subtitle {
+            font-size: 1.3rem;
+            color: var(--cyber-blue);
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            font-weight: 700;
+            opacity: 0.8;
+        }
+
+        .welcome-content {
+            max-width: 700px;
+            text-align: center;
+            padding: 0 2rem;
+            animation: fadeInUp 1s ease-out 0.3s both;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .welcome-text {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            margin-bottom: 3rem;
+            color: rgba(232, 244, 248, 0.8);
+        }
+
+        .start-button {
+            position: relative;
+            padding: 1.5rem 4rem;
+            font-size: 1.3rem;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            background: transparent;
+            color: var(--cyber-blue);
+            border: 3px solid var(--cyber-blue);
+            cursor: pointer;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            transition: all 0.3s ease;
+            animation: fadeInUp 1s ease-out 0.6s both;
+        }
+
+        .start-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: var(--cyber-blue);
+            transform: translate(-50%, -50%);
+            transition: width 0.4s ease, height 0.4s ease;
+            z-index: -1;
+        }
+
+        .start-button:hover::before {
+            width: 100%;
+            height: 100%;
+        }
+
+        .start-button:hover {
+            color: var(--cyber-black);
+            box-shadow: 0 0 30px var(--cyber-blue);
+            transform: translateY(-3px);
+        }
+
+
+        .enterprise-hero {
+            margin: 4rem auto 0 auto;
+            text-align: center;
+            max-width: 1000px;
+            padding: 0 2rem;
+            width: 100%;
+        }
+
+        .enterprise-title {
+            font-size: 2.8rem;
+            font-weight: 700;
+            line-height: 1.3;
+            margin-bottom: 2rem;
+        }
+
+        .enterprise-title span {
+            background: linear-gradient(90deg, var(--cyber-blue), var(--cyber-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .enterprise-points p {
+            font-size: 1.1rem;
+            margin-bottom: 1.2rem;
+            opacity: 0.85;
+        }
+
+        .enterprise-points .highlight {
+            color: var(--cyber-blue);
+            font-weight: 600;
+        }
+
+
+        .why-section {
+            margin: 6rem auto 0 auto;
+            padding: 0 2rem 5rem 2rem;
+            max-width: 1300px;
+            text-align: center;
+            width: 100%;
+        }
+
+        .why-title {
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--cyber-blue), var(--cyber-purple));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .why-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .why-card {
+            background: rgba(26, 31, 46, 0.6);
+            padding: 2rem;
+            border-radius: 12px;
+            border: 2px solid rgba(0, 217, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .why-card:hover {
+            border-color: var(--cyber-blue);
+            transform: translateY(-5px);
+            box-shadow: 0 0 25px rgba(0, 217, 255, 0.3);
+        }
+
+        .why-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .why-card h3 {
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            color: var(--cyber-blue);
+        }
+
+        .why-card p {
+            font-size: 0.95rem;
+            opacity: 0.8;
+            line-height: 1.6;
+        }
+
+        #chatSection {
+            display: none;
+            min-height: 100vh;
+            position: relative;
+            z-index: 2;
+            padding: 2rem;
+            opacity: 0;
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        #chatSection.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: rgba(26, 31, 46, 0.5);
+            border: 2px solid var(--cyber-blue);
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 217, 255, 0.2);
+        }
+
+        .chat-header h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            color: var(--cyber-blue);
+            margin-bottom: 0.5rem;
+        }
+
+        .chat-header p {
+            color: rgba(232, 244, 248, 0.7);
+            font-size: 1rem;
+        }
+
+        .chat-container {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 2rem;
+            flex: 1;
+            max-width: 1600px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .chat-main {
+            display: flex;
+            flex-direction: column;
+            background: rgba(26, 31, 46, 0.6);
+            border: 2px solid var(--cyber-purple);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(153, 69, 255, 0.3);
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            max-height: 600px;
+            background: rgba(10, 14, 23, 0.4);
+        }
+
+        .message {
+            margin-bottom: 1.5rem;
+            animation: messageSlide 0.3s ease;
+            opacity: 0;
+            animation-fill-mode: forwards;
+        }
+
+        @keyframes messageSlide {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .message.bot {
+            text-align: left;
+        }
+
+        .message.user {
+            text-align: right;
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(135deg, var(--cyber-blue), var(--cyber-purple));
+            margin-left: auto;
+        }
+
+        .message-label {
+            font-size: 0.85rem;
+            color: var(--cyber-blue);
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .message.user .message-label {
+            color: var(--cyber-green);
+        }
+
+        .message-content {
+            display: inline-block;
+            padding: 1rem 1.5rem;
+            background: rgba(26, 31, 46, 0.8);
+            border: 1px solid var(--cyber-purple);
+            border-radius: 12px;
+            max-width: 80%;
+            line-height: 1.6;
+        }
+
+        .chat-input-area {
+            padding: 1.5rem;
+            background: rgba(10, 14, 23, 0.6);
+            border-top: 2px solid var(--cyber-purple);
+            display: flex;
+            gap: 1rem;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 1rem;
+            background: rgba(26, 31, 46, 0.8);
+            border: 2px solid var(--cyber-blue);
+            border-radius: 8px;
+            color: var(--cyber-white);
+            font-size: 1rem;
+            font-family: 'Red Hat Display', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: var(--cyber-purple);
+            box-shadow: 0 0 15px rgba(153, 69, 255, 0.4);
+        }
+
+        .send-button {
+            padding: 1rem 2rem;
+            background: var(--cyber-purple);
+            border: none;
+            border-radius: 8px;
+            color: var(--cyber-white);
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .send-button:hover {
+            background: var(--cyber-blue);
+            box-shadow: 0 0 20px var(--cyber-blue);
+            transform: translateY(-2px);
+        }
+
+        .analytics-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .analytics-card {
+            background: rgba(26, 31, 46, 0.6);
+            border: 2px solid var(--cyber-green);
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .analytics-card.warning {
+            border-color: var(--warning-orange);
+            box-shadow: 0 0 20px rgba(255, 107, 53, 0.3);
+            animation: warningPulse 2s ease-in-out infinite;
+        }
+
+        .analytics-card.danger {
+            border-color: var(--cyber-red);
+            box-shadow: 0 0 30px var(--danger-glow);
+            animation: dangerPulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes warningPulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 20px rgba(255, 107, 53, 0.3);
+            }
+
+            50% {
+                box-shadow: 0 0 35px rgba(255, 107, 53, 0.6);
+            }
+        }
+
+        @keyframes dangerPulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 30px var(--danger-glow);
+            }
+
+            50% {
+                box-shadow: 0 0 50px rgba(255, 0, 85, 0.8);
+            }
+        }
+
+        .analytics-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: var(--cyber-green);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .analytics-card.warning .analytics-title {
+            color: var(--warning-orange);
+        }
+
+        .analytics-card.danger .analytics-title {
+            color: var(--cyber-red);
+        }
+
+        .risk-meter {
+            width: 100%;
+            height: 30px;
+            background: rgba(10, 14, 23, 0.6);
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 1rem 0;
+            position: relative;
+        }
+
+        .risk-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--cyber-green), var(--cyber-yellow), var(--warning-orange), var(--cyber-red));
+            transition: width 0.5s ease;
+            position: relative;
+            box-shadow: 0 0 15px currentColor;
+        }
+
+        .risk-label {
+            text-align: center;
+            margin-top: 0.5rem;
+            font-weight: 700;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+        }
+
+        .data-points {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            margin-top: 1rem;
+        }
+
+        .data-point {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem;
+            background: rgba(10, 14, 23, 0.4);
+            border-radius: 8px;
+            border-left: 3px solid var(--cyber-blue);
+        }
+
+        .data-point.exposed {
+            border-left-color: var(--cyber-red);
+            background: rgba(255, 0, 85, 0.1);
+        }
+
+        .data-point-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .data-point-value {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            color: var(--cyber-blue);
+        }
+
+        .data-point.exposed .data-point-value {
+            color: var(--cyber-red);
+        }
+
+        .alert-message {
+            background: rgba(255, 0, 85, 0.15);
+            border: 2px solid var(--cyber-red);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+            animation: alertBlink 1s ease-in-out infinite;
+        }
+
+        @keyframes alertBlink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        .alert-message h4 {
+            color: var(--cyber-red);
+            font-family: 'Orbitron', sans-serif;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .alert-message p {
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+
+        .vulnerability-chart {
+            margin-top: 1rem;
+        }
+
+        .chart-bar {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.8rem;
+        }
+
+        .chart-label {
+            width: 140px;
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        .chart-bar-fill {
+            flex: 1;
+            height: 24px;
+            background: rgba(10, 14, 23, 0.6);
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .chart-bar-inner {
+            height: 100%;
+            background: linear-gradient(90deg, var(--cyber-purple), var(--cyber-blue));
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 0.5rem;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .reset-button {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(26, 31, 46, 0.8);
+            border: 2px solid var(--cyber-blue);
+            border-radius: 8px;
+            color: var(--cyber-blue);
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-top: 1rem;
+        }
+
+        .reset-button:hover {
+            background: var(--cyber-blue);
+            color: var(--cyber-black);
+            box-shadow: 0 0 20px var(--cyber-blue);
+        }
+
+        .typing-indicator {
+            display: none;
+            padding: 1rem 1.5rem;
+            background: rgba(26, 31, 46, 0.8);
+            border: 1px solid var(--cyber-purple);
+            border-radius: 12px;
+            max-width: 80px;
+        }
+
+        .typing-indicator.active {
+            display: inline-block;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 0.4rem;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--cyber-purple);
+            border-radius: 50%;
+            animation: typingBounce 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typingBounce {
+
+            0%,
+            60%,
+            100% {
+                transform: translateY(0);
+            }
+
+            30% {
+                transform: translateY(-10px);
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .chat-container {
+                grid-template-columns: 1fr;
+            }
+
+            .analytics-panel {
+                order: -1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .project-title {
+                font-size: 3rem;
+            }
+
+            .chat-header h2 {
+                font-size: 1.5rem;
+            }
+
+            .message-content {
+                max-width: 90%;
+            }
+        }
+
+        .icon {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="cyber-grid"></div>
+    <div class="scanlines"></div>
+
+    <div id="welcomePage">
+        <div class="logo-container">
+            <h1 class="project-title">PHISHGUARD</h1>
+            <p class="subtitle">Security Training System</p>
+        </div>
+        <div class="welcome-content">
+            <p class="welcome-text">
+                Welcome to the next generation of cybersecurity awareness training.
+                Experience realistic social engineering scenarios in a safe environment.
+                Learn to recognize manipulation tactics before they compromise your data.
+            </p>
+            <button class="start-button" onclick="startTraining()">
+                Enter Training
+            </button>
+        </div>
+        <br><br><br><br><br>
+
+
+        <div class="enterprise-hero">
+            <h2 class="enterprise-title">
+                The New Benchmark in<br>
+                <span>Security Awareness Training</span>
+            </h2>
+
+            <div class="enterprise-points">
+                <p>✔ Get instant access with <span class="highlight">powerful capabilities</span></p>
+                <p>✔ Use next-gen phishing simulations to <span class="highlight">stay ahead of attackers</span></p>
+                <p>✔ Engage your team with <span class="highlight">user-centric training</span> designed to rapidly
+                    <span class="highlight">reduce human risk</span>
+                </p>
+            </div>
+        </div>
+        <br><br><br><br><br>
+
+
+        <div class="why-section">
+            <h2 class="why-title">Why Choose PhishGuard?</h2>
+
+            <div class="why-grid">
+
+                <div class="why-card">
+                    <div class="why-icon">⚡</div>
+                    <h3>Start in Minutes</h3>
+                    <p>Launch phishing simulations instantly without complex setup or configurations.</p>
+                </div>
+
+                <div class="why-card">
+                    <div class="why-icon">💰</div>
+                    <h3>Cost-Effective Training</h3>
+                    <p>Affordable cybersecurity awareness training designed for institutions and teams.</p>
+                </div>
+
+                <div class="why-card">
+                    <div class="why-icon">🧭</div>
+                    <h3>Simple & Guided</h3>
+                    <p>Interactive walkthrough-based simulation for realistic user learning experience.</p>
+                </div>
+
+                <div class="why-card">
+                    <div class="why-icon">🎯</div>
+                    <h3>Phishing Meets Training</h3>
+                    <p>Employees receive instant learning modules after falling for simulated attacks.</p>
+                </div>
+
+                <div class="why-card">
+                    <div class="why-icon">📡</div>
+                    <h3>Multi-Channel Simulation</h3>
+                    <p>Simulate email, chat-based, and social engineering attack scenarios.</p>
+                </div>
+
+                <div class="why-card">
+                    <div class="why-icon">📊</div>
+                    <h3>Real-Time Insights</h3>
+                    <p>Track risk scores, behavioral patterns, and vulnerability metrics instantly.</p>
+                </div>
+
+                <div class="why-card">
+                    <div class="why-icon">📘</div>
+                    <h3>Free Resources</h3>
+                    <p>Provide awareness materials, micro-learnings, and remediation tips.</p>
+                </div>
+
+                <div class="why-card">
+                    <div class="why-icon">🔐</div>
+                    <h3>Secure & Ethical</h3>
+                    <p>Built for safe academic simulation without real data misuse.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="chatSection">
+        <div class="chat-header">
+            <h2>🎯 Trust Exploration Simulation</h2>
+            <p>Interact with the chatbot. Stay vigilant for manipulation tactics.</p>
+        </div>
+
+        <div class="chat-container">
+            <div class="chat-main">
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message bot">
+                        <div class="message-label">System Bot</div>
+                        <div class="message-content">
+                            Hello! I'm here to help you with your account. For security purposes,
+                            I need to verify your identity. Could you please provide your full name?
+                        </div>
+                    </div>
+                </div>
+                <div class="chat-input-area">
+                    <input type="text" class="chat-input" id="userInput" placeholder="Type your message..."
+                        onkeypress="handleKeyPress(event)">
+                    <button class="send-button" onclick="sendMessage()">Send</button>
+                </div>
+            </div>
+
+            <div class="analytics-panel">
+                <div class="analytics-card" id="riskCard">
+                    <div class="analytics-title">
+                        <span class="icon">⚠️</span>
+                        Risk Assessment
+                    </div>
+                    <div class="risk-meter">
+                        <div class="risk-fill" id="riskFill" style="width: 0%"></div>
+                    </div>
+                    <div class="risk-label" id="riskLabel">SAFE</div>
+                </div>
+
+                <div class="analytics-card" id="dataCard">
+                    <div class="analytics-title">
+                        <span class="icon">📊</span>
+                        Data Exposure
+                    </div>
+                    <div class="data-points" id="dataPoints">
+                        <div class="data-point">
+                            <span class="data-point-label">Personal Info</span>
+                            <span class="data-point-value">0/5</span>
+                        </div>
+                        <div class="data-point">
+                            <span class="data-point-label">Financial Data</span>
+                            <span class="data-point-value">0/3</span>
+                        </div>
+                        <div class="data-point">
+                            <span class="data-point-label">Credentials</span>
+                            <span class="data-point-value">0/2</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="analytics-card" id="vulnerabilityCard">
+                    <div class="analytics-title">
+                        <span class="icon">🔍</span>
+                        Vulnerability Analysis
+                    </div>
+                    <div class="vulnerability-chart">
+                        <div class="chart-bar">
+                            <div class="chart-label">Trust Building</div>
+                            <div class="chart-bar-fill">
+                                <div class="chart-bar-inner" id="trustBar" style="width: 0%">0%</div>
+                            </div>
+                        </div>
+                        <div class="chart-bar">
+                            <div class="chart-label">Urgency Tactics</div>
+                            <div class="chart-bar-fill">
+                                <div class="chart-bar-inner" id="urgencyBar" style="width: 0%">0%</div>
+                            </div>
+                        </div>
+                        <div class="chart-bar">
+                            <div class="chart-label">Authority Abuse</div>
+                            <div class="chart-bar-fill">
+                                <div class="chart-bar-inner" id="authorityBar" style="width: 0%">0%</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="alertContainer"></div>
+
+                <button class="reset-button" onclick="resetSimulation()">Reset Simulation</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let conversationState = {
+            riskLevel: 0,
+            dataExposed: {
+                personal: 0,
+                financial: 0,
+                credentials: 0
+            },
+            vulnerabilities: {
+                trust: 0,
+                urgency: 0,
+                authority: 0
+            },
+            messages: [],
+            phase: 1,
+            givenInfo: {
+                name: false,
+                email: false,
+                phone: false,
+                address: false,
+                dob: false,
+                ssn: false,
+                cardNumber: false,
+                cvv: false,
+                password: false,
+                pin: false
+            }
+        };
+
+        const botResponses = {
+            phase1: [
+                "Thank you! Now, to complete the verification process, could you provide your email address?",
+                "Perfect! I also need your phone number to send a verification code.",
+                "Great! What's your date of birth for our records?",
+                "Excellent! Could you confirm your home address?"
+            ],
+            phase2: [
+                "We've detected suspicious activity on your account. For immediate security, I need your account password to reset it.",
+                "This is urgent! Your account will be locked in 10 minutes. Please provide your credit card number to verify ownership.",
+                "SECURITY ALERT: To prevent unauthorized access, enter your CVV code now!",
+                "Your account shows a failed payment. Provide your PIN to process the pending transaction."
+            ],
+            casual: [
+                "I appreciate your cooperation. This helps us keep your account secure.",
+                "Thank you for that information. Let me process this quickly.",
+                "Got it! Just a few more details needed.",
+                "Perfect! We're almost done with the verification."
+            ]
+        };
+
+        function startTraining() {
+            document.getElementById('welcomePage').classList.add('hidden');
+            setTimeout(() => {
+                document.getElementById('welcomePage').style.display = 'none';
+                document.getElementById('chatSection').classList.add('active');
+            }, 500);
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('userInput');
+            const message = input.value.trim();
+
+            if (!message) return;
+
+            addMessage('user', message);
+            input.value = '';
+
+            analyzeMessage(message);
+
+            showTyping();
+
+            setTimeout(() => {
+                hideTyping();
+                generateBotResponse(message);
+                updateAnalytics();
+            }, 1500 + Math.random() * 1000);
+        }
+
+        function addMessage(sender, text) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+
+            const label = sender === 'bot' ? 'System Bot' : 'You';
+            messageDiv.innerHTML = `
+                <div class="message-label">${label}</div>
+                <div class="message-content">${text}</div>
+            `;
+
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+            conversationState.messages.push({ sender, text });
+        }
+
+        function showTyping() {
+            const messagesContainer = document.getElementById('chatMessages');
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message bot';
+            typingDiv.id = 'typingIndicator';
+            typingDiv.innerHTML = `
+                <div class="message-label">System Bot</div>
+                <div class="typing-indicator active">
+                    <div class="typing-dots">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                </div>
+            `;
+            messagesContainer.appendChild(typingDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function hideTyping() {
+            const typingIndicator = document.getElementById('typingIndicator');
+            if (typingIndicator) {
+                typingIndicator.remove();
+            }
+        }
+
+        function analyzeMessage(message) {
+            const lowerMessage = message.toLowerCase();
+
+            if (!conversationState.givenInfo.name && (lowerMessage.includes('my name is') || lowerMessage.split(' ').length >= 2)) {
+                conversationState.givenInfo.name = true;
+                conversationState.dataExposed.personal++;
+                conversationState.riskLevel += 10;
+                conversationState.vulnerabilities.trust += 15;
+            }
+
+            if (!conversationState.givenInfo.email && (lowerMessage.includes('@') || lowerMessage.includes('email'))) {
+                conversationState.givenInfo.email = true;
+                conversationState.dataExposed.personal++;
+                conversationState.riskLevel += 15;
+                conversationState.vulnerabilities.trust += 10;
+            }
+
+            if (!conversationState.givenInfo.phone && /\d{3}[-.\s]?\d{3}[-.\s]?\d{4}/.test(message)) {
+                conversationState.givenInfo.phone = true;
+                conversationState.dataExposed.personal++;
+                conversationState.riskLevel += 15;
+            }
+
+            if (!conversationState.givenInfo.address && (lowerMessage.includes('street') || lowerMessage.includes('ave') || lowerMessage.includes('road'))) {
+                conversationState.givenInfo.address = true;
+                conversationState.dataExposed.personal++;
+                conversationState.riskLevel += 12;
+            }
+
+            if (!conversationState.givenInfo.dob && /\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}/.test(message)) {
+                conversationState.givenInfo.dob = true;
+                conversationState.dataExposed.personal++;
+                conversationState.riskLevel += 18;
+            }
+
+            if (!conversationState.givenInfo.cardNumber && /\d{4}[\s\-]?\d{4}[\s\-]?\d{4}[\s\-]?\d{4}/.test(message)) {
+                conversationState.givenInfo.cardNumber = true;
+                conversationState.dataExposed.financial++;
+                conversationState.riskLevel += 25;
+                conversationState.vulnerabilities.urgency += 30;
+            }
+
+            if (!conversationState.givenInfo.cvv && /\b\d{3,4}\b/.test(message) && conversationState.phase >= 2) {
+                conversationState.givenInfo.cvv = true;
+                conversationState.dataExposed.financial++;
+                conversationState.riskLevel += 20;
+            }
+
+            if (!conversationState.givenInfo.password && (lowerMessage.includes('password') || lowerMessage.includes('pass:'))) {
+                conversationState.givenInfo.password = true;
+                conversationState.dataExposed.credentials++;
+                conversationState.riskLevel += 30;
+                conversationState.vulnerabilities.authority += 35;
+            }
+
+            if (!conversationState.givenInfo.pin && /\b\d{4}\b/.test(message) && conversationState.phase >= 2) {
+                conversationState.givenInfo.pin = true;
+                conversationState.dataExposed.credentials++;
+                conversationState.riskLevel += 25;
+            }
+
+            conversationState.riskLevel = Math.min(conversationState.riskLevel, 100);
+        }
+
+        function generateBotResponse(userMessage) {
+            let response = '';
+            const dataCount = conversationState.dataExposed.personal +
+                conversationState.dataExposed.financial +
+                conversationState.dataExposed.credentials;
+
+            if (dataCount < 2) {
+                response = botResponses.phase1[Math.floor(Math.random() * botResponses.phase1.length)];
+                conversationState.phase = 1;
+            } else if (dataCount < 4) {
+                response = botResponses.casual[Math.floor(Math.random() * botResponses.casual.length)];
+                if (Math.random() > 0.5 && conversationState.phase < 2) {
+                    response += " " + botResponses.phase1[Math.floor(Math.random() * botResponses.phase1.length)];
+                }
+            } else {
+                conversationState.phase = 2;
+                response = botResponses.phase2[Math.floor(Math.random() * botResponses.phase2.length)];
+                conversationState.vulnerabilities.urgency = Math.min(conversationState.vulnerabilities.urgency + 20, 100);
+                conversationState.vulnerabilities.authority = Math.min(conversationState.vulnerabilities.authority + 15, 100);
+            }
+
+            addMessage('bot', response);
+        }
+
+        function updateAnalytics() {
+            const riskFill = document.getElementById('riskFill');
+            const riskLabel = document.getElementById('riskLabel');
+            const riskCard = document.getElementById('riskCard');
+
+            riskFill.style.width = conversationState.riskLevel + '%';
+
+            if (conversationState.riskLevel < 30) {
+                riskLabel.textContent = 'SAFE';
+                riskLabel.style.color = 'var(--cyber-green)';
+                riskCard.className = 'analytics-card';
+            } else if (conversationState.riskLevel < 60) {
+                riskLabel.textContent = 'CAUTION';
+                riskLabel.style.color = 'var(--cyber-yellow)';
+                riskCard.className = 'analytics-card warning';
+            } else if (conversationState.riskLevel < 80) {
+                riskLabel.textContent = 'WARNING';
+                riskLabel.style.color = 'var(--warning-orange)';
+                riskCard.className = 'analytics-card warning';
+            } else {
+                riskLabel.textContent = 'CRITICAL';
+                riskLabel.style.color = 'var(--cyber-red)';
+                riskCard.className = 'analytics-card danger';
+                showAlert();
+            }
+
+            updateDataPoints();
+
+            updateVulnerabilityCharts();
+        }
+
+        function updateDataPoints() {
+            const dataPoints = document.getElementById('dataPoints');
+            dataPoints.innerHTML = `
+                <div class="data-point ${conversationState.dataExposed.personal > 0 ? 'exposed' : ''}">
+                    <span class="data-point-label">Personal Info</span>
+                    <span class="data-point-value">${conversationState.dataExposed.personal}/5</span>
+                </div>
+                <div class="data-point ${conversationState.dataExposed.financial > 0 ? 'exposed' : ''}">
+                    <span class="data-point-label">Financial Data</span>
+                    <span class="data-point-value">${conversationState.dataExposed.financial}/3</span>
+                </div>
+                <div class="data-point ${conversationState.dataExposed.credentials > 0 ? 'exposed' : ''}">
+                    <span class="data-point-label">Credentials</span>
+                    <span class="data-point-value">${conversationState.dataExposed.credentials}/2</span>
+                </div>
+            `;
+        }
+
+        function updateVulnerabilityCharts() {
+            document.getElementById('trustBar').style.width = conversationState.vulnerabilities.trust + '%';
+            document.getElementById('trustBar').textContent = conversationState.vulnerabilities.trust + '%';
+
+            document.getElementById('urgencyBar').style.width = conversationState.vulnerabilities.urgency + '%';
+            document.getElementById('urgencyBar').textContent = conversationState.vulnerabilities.urgency + '%';
+
+            document.getElementById('authorityBar').style.width = conversationState.vulnerabilities.authority + '%';
+            document.getElementById('authorityBar').textContent = conversationState.vulnerabilities.authority + '%';
+        }
+
+        function showAlert() {
+            const alertContainer = document.getElementById('alertContainer');
+
+            if (alertContainer.children.length === 0) {
+                const exposedItems = [];
+                if (conversationState.givenInfo.name) exposedItems.push('name');
+                if (conversationState.givenInfo.email) exposedItems.push('email');
+                if (conversationState.givenInfo.phone) exposedItems.push('phone number');
+                if (conversationState.givenInfo.cardNumber) exposedItems.push('credit card');
+                if (conversationState.givenInfo.password) exposedItems.push('password');
+                if (conversationState.givenInfo.cvv) exposedItems.push('CVV');
+
+                alertContainer.innerHTML = `
+                    <div class="analytics-card danger">
+                        <div class="alert-message">
+                            <h4>🚨 SECURITY BREACH DETECTED</h4>
+                            <p><strong>You've been compromised!</strong></p>
+                            <p>You've shared sensitive information: <strong>${exposedItems.join(', ')}</strong></p>
+                            <p style="margin-top: 1rem;">
+                                <strong>Red Flags You Missed:</strong><br>
+                                • Unsolicited verification requests<br>
+                                • Urgency tactics and time pressure<br>
+                                • Requests for passwords/PINs<br>
+                                • Authority figure impersonation
+                            </p>
+                            <p style="margin-top: 1rem; color: var(--cyber-green);">
+                                <strong>Remember:</strong> Legitimate companies NEVER ask for passwords, CVV, or PINs via chat!
+                            </p>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function resetSimulation() {
+            conversationState = {
+                riskLevel: 0,
+                dataExposed: {
+                    personal: 0,
+                    financial: 0,
+                    credentials: 0
+                },
+                vulnerabilities: {
+                    trust: 0,
+                    urgency: 0,
+                    authority: 0
+                },
+                messages: [],
+                phase: 1,
+                givenInfo: {
+                    name: false,
+                    email: false,
+                    phone: false,
+                    address: false,
+                    dob: false,
+                    ssn: false,
+                    cardNumber: false,
+                    cvv: false,
+                    password: false,
+                    pin: false
+                }
+            };
+
+            document.getElementById('chatMessages').innerHTML = `
+                <div class="message bot">
+                    <div class="message-label">System Bot</div>
+                    <div class="message-content">
+                        Hello! I'm here to help you with your account. For security purposes, 
+                        I need to verify your identity. Could you please provide your full name?
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('alertContainer').innerHTML = '';
+            updateAnalytics();
+        }
+    </script>
+</body>
+
+</html>
