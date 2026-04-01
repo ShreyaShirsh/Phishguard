@@ -413,7 +413,8 @@
                 </article>
                 <article class="stat-card">
                     <h3>Active Campaigns</h3>
-                    <div class="value">6</div>
+                    <!-- <div class="value">6</div> -->
+                    <div class="value" id="campaignCount">0</div>
                     <p class="meta">2 campaigns launching this week</p>
                 </article>
                 <article class="stat-card">
@@ -455,6 +456,8 @@
                             <div class="tag safe">Low</div>
                         </div>
                     </div>
+                    <h3 style="margin-top:20px;">Live Campaigns</h3>
+                    <div id="campaignList" style="margin-top:10px;"></div>
                 </article>
 
                 <article class="panel">
@@ -494,65 +497,79 @@
     </div>
 
     <script>
-        var clickRates = [12, 18, 15, 22, 19, 16, 14];
-        var labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        async function loadCampaigns() {
+            try {
+                const res = await fetch("http://localhost:5000/campaigns");
+                const data = await res.json();
 
-        function renderChart() {
-            var chart = document.getElementById('chartWrap');
-            chart.innerHTML = '';
-            for (var i = 0; i < clickRates.length; i++) {
-                var col = document.createElement('div');
-                col.className = 'bar-col';
+                const container = document.getElementById("campaignList");
 
-                var value = document.createElement('div');
-                value.className = 'bar-value';
-                value.textContent = clickRates[i] + '%';
+                container.innerHTML = "";
 
-                var bar = document.createElement('div');
-                bar.className = 'bar';
-                bar.setAttribute('data-height', Math.max(20, clickRates[i] * 8));
+                document.getElementById("campaignCount").innerText = data.length;
 
-                var label = document.createElement('div');
-                label.className = 'bar-label';
-                label.textContent = labels[i];
+                data.forEach(campaign => {
+                    const div = document.createElement("div");
+                    // div.style.padding = "10px";
+                    // div.style.borderBottom = "1px solid #444";
+                    div.style.padding = "12px";
+                    div.style.border = "1px solid rgba(0,217,255,0.3)";
+                    div.style.borderRadius = "8px";
+                    div.style.marginBottom = "10px";
+                    div.style.background = "rgba(10,14,23,0.6)";
 
-                col.appendChild(value);
-                col.appendChild(bar);
-                col.appendChild(label);
-                chart.appendChild(col);
+                    div.innerHTML = `
+    <strong>${campaign.campaignName}</strong><br>
+    Template: ${campaign.template}<br>
+    Department: ${campaign.department || "All"}<br>
+    Created By: ${campaign.createdBy}<br><br>
+
+    <button onclick="deleteCampaign('${campaign._id}')"
+        style="padding:6px 10px; background:red; color:white; border:none; border-radius:5px; cursor:pointer;">
+        Delete
+    </button>
+`;
+
+                    container.appendChild(div);
+                });
+
+            } catch (error) {
+                console.error(error);
             }
-
-            setTimeout(function () {
-                var bars = document.querySelectorAll('.bar');
-                for (var j = 0; j < bars.length; j++) {
-                    bars[j].style.height = bars[j].getAttribute('data-height') + 'px';
-                }
-            }, 120);
         }
 
-        function setHeaderInfo() {
-            var storedEmail = sessionStorage.getItem('userEmail');
-            if (storedEmail) {
-                document.getElementById('welcomeText').textContent = 'Logged in as ' + storedEmail + '. Monitor employee awareness and campaign outcomes.';
+        // load when page opens
+        loadCampaigns();
+
+        async function deleteCampaign(id) {
+            try {
+                const res = await fetch(`http://localhost:5000/campaign/${id}`, {
+                    method: "DELETE"
+                });
+
+                const data = await res.json();
+
+                alert(data.message);
+
+                // reload campaigns
+                loadCampaigns();
+
+            } catch (error) {
+                console.error(error);
+                alert("Error deleting campaign ❌");
             }
-            var now = new Date();
-            document.getElementById('todayText').textContent = 'Last Updated: ' + now.toLocaleDateString() + ' ' + now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         }
 
-        function logout() {
-            sessionStorage.removeItem('userRole');
-            sessionStorage.removeItem('userEmail');
-            window.location.href = 'login.html';
-        }
+        document.querySelectorAll(".menu button")[1].onclick = () => {
+            window.location.href = "employees.html";
+        };
 
-        window.onload = function () {
-            var role = sessionStorage.getItem('userRole');
-            if (role && role !== 'admin') {
-                window.location.href = 'employee-dashboard.html';
-                return;
-            }
-            renderChart();
-            setHeaderInfo();
+        document.querySelectorAll(".menu button")[2].onclick = () => {
+            window.location.href = "create-campaign.html";
+        };
+
+        document.querySelectorAll(".menu button")[3].onclick = () => {
+            window.location.href = "analytics.html";
         };
     </script>
 </body>

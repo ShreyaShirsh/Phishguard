@@ -4,40 +4,30 @@ const cors = require("cors");
 
 const app = express();
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 
-// Import User Model
 const User = require("./models/User");
+const Campaign = require("./models/campaign");
 
-
-// 🔗 MongoDB Connection
 mongoose.connect("mongodb://127.0.0.1:27017/phishguard")
 .then(() => console.log("MongoDB Connected ✅"))
 .catch(err => console.log(err));
 
-
-// 🧪 Test Route
 app.get("/", (req, res) => {
     res.send("PhishGuard Backend Running 🚀");
 });
 
-
-// 👤 REGISTER API
 app.post("/register", async (req, res) => {
     try {
         const newUser = new User(req.body);
         await newUser.save();
-
         res.json({ message: "User Registered Successfully ✅" });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-
-// 🔑 LOGIN API
 app.post("/login", async (req, res) => {
     try {
         const user = await User.findOne({
@@ -60,8 +50,36 @@ app.post("/login", async (req, res) => {
     }
 });
 
+app.post("/campaign", async (req, res) => {
+    try {
+        const newCampaign = new Campaign(req.body);
+        await newCampaign.save();
+        res.json({ message: "Campaign Created Successfully ✅" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
 
-// 🚀 Start Server
+// 🔥 NEW API
+app.get("/campaigns", async (req, res) => {
+    try {
+        const campaigns = await Campaign.find();
+        res.json(campaigns);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// 🗑 DELETE CAMPAIGN
+app.delete("/campaign/:id", async (req, res) => {
+    try {
+        await Campaign.findByIdAndDelete(req.params.id);
+        res.json({ message: "Campaign Deleted Successfully ✅" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 app.listen(5000, () => {
     console.log("Server running on port 5000");
 });

@@ -1,183 +1,228 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Campaign - PhishGuard</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Red+Hat+Display:wght@400;500;700&display=swap');
-        *{
-            margin:0;
-            padding:0;
-            box-sizing:border-box
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
         }
-        :root{
-            --cyber-black:#0a0e17;
-            --cyber-panel:#1a1f2e;
-            --cyber-blue:#00d9ff;
-            --cyber-red:#ff0055;
-            --cyber-purple:#9945ff;
-            --cyber-green:#00ff88;
-            --cyber-white:#e8f4f8
+
+        :root {
+            --cyber-black: #0a0e17;
+            --cyber-panel: #1a1f2e;
+            --cyber-blue: #00d9ff;
+            --cyber-red: #ff0055;
+            --cyber-purple: #9945ff;
+            --cyber-green: #00ff88;
+            --cyber-white: #e8f4f8
         }
-        body{
-            font-family:'Red Hat Display',sans-serif;
-            background:linear-gradient(120deg,#0a0e17 0%,#141a29 100%);
-            color:var(--cyber-white);min-height:100vh;padding:28px
+
+        body {
+            font-family: 'Red Hat Display', sans-serif;
+            background: linear-gradient(120deg, #0a0e17 0%, #141a29 100%);
+            color: var(--cyber-white);
+            min-height: 100vh;
+            padding: 28px
         }
-        .grid-bg{
-            position:fixed;
-            inset:0;
-            background-image:linear-gradient(rgba(0,217,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,217,255,0.03) 1px,transparent 1px);
-            background-size:42px 42px;
-            pointer-events:none;
-            z-index:0
+
+        .grid-bg {
+            position: fixed;
+            inset: 0;
+            background-image: linear-gradient(rgba(0, 217, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 217, 255, 0.03) 1px, transparent 1px);
+            background-size: 42px 42px;
+            pointer-events: none;
+            z-index: 0
         }
-        .container{
-            max-width:900px;
-            margin:0 auto;
-            position:relative;
-            z-index:2
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2
         }
-        .topbar{
-            display:flex;
-            justify-content:space-between;
-            align-items:flex-start;
-            gap:20px;
-            margin-bottom:22px
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 20px;
+            margin-bottom: 22px
         }
-        .topbar h1{
-            font-family:'Orbitron',sans-serif;color:var(--cyber-blue);
-            font-size:1.6rem;
-            letter-spacing:0.06em
+
+        .topbar h1 {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--cyber-blue);
+            font-size: 1.6rem;
+            letter-spacing: 0.06em
         }
-        .topbar p{
-            margin-top:7px;
-            color:rgba(232,244,248,0.76)
+
+        .topbar p {
+            margin-top: 7px;
+            color: rgba(232, 244, 248, 0.76)
         }
-        .topbar a{
-            text-decoration:none;
-            padding:10px 14px;
-            border:1px solid rgba(0,217,255,0.35);
-            border-radius:10px;color:var(--cyber-white);
-            font-family:'Orbitron',sans-serif;
-            font-size:0.8rem;
-            letter-spacing:0.06em;
-            background:rgba(26,31,46,0.75);
-            transition:all 0.25s
+
+        .topbar a {
+            text-decoration: none;
+            padding: 10px 14px;
+            border: 1px solid rgba(0, 217, 255, 0.35);
+            border-radius: 10px;
+            color: var(--cyber-white);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.8rem;
+            letter-spacing: 0.06em;
+            background: rgba(26, 31, 46, 0.75);
+            transition: all 0.25s
         }
-        .topbar a:hover{
-            border-color:var(--cyber-blue);
-            box-shadow:0 0 18px rgba(0,217,255,0.22)
+
+        .topbar a:hover {
+            border-color: var(--cyber-blue);
+            box-shadow: 0 0 18px rgba(0, 217, 255, 0.22)
         }
-        .form-card{
-            background:rgba(26,31,46,0.85);
-            border:1px solid rgba(0,217,255,0.25);
-            border-radius:14px;
-            padding:24px
+
+        .form-card {
+            background: rgba(26, 31, 46, 0.85);
+            border: 1px solid rgba(0, 217, 255, 0.25);
+            border-radius: 14px;
+            padding: 24px
         }
-        .form-grid{
-            display:grid;
-            grid-template-columns:1fr 1fr;
-            gap:18px
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px
         }
-        .field{
-            display:flex;
-            flex-direction:column;
-            gap:10px
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 10px
         }
-        .field.full{
-            grid-column:1 / -1
+
+        .field.full {
+            grid-column: 1 / -1
         }
-        .label{
-            font-family:'Orbitron',sans-serif;
-            font-size:0.78rem;
-            letter-spacing:0.08em;
-            text-transform:uppercase;
-            color:rgba(232,244,248,0.88)
+
+        .label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.78rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: rgba(232, 244, 248, 0.88)
         }
-        .input,.select{
-            width:100%;
-            padding:13px 14px;
-            border:2px solid rgba(0,217,255,0.25);
-            border-radius:10px;
-            background:rgba(10,14,23,0.7);
-            color:var(--cyber-white);
-            font-size:0.95rem;
-            outline:none;
-            transition:all 0.25s
+
+        .input,
+        .select {
+            width: 100%;
+            padding: 13px 14px;
+            border: 2px solid rgba(0, 217, 255, 0.25);
+            border-radius: 10px;
+            background: rgba(10, 14, 23, 0.7);
+            color: var(--cyber-white);
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.25s
         }
-        .input:focus,.select:focus{
-            border-color:var(--cyber-blue);
-            box-shadow:0 0 16px rgba(0,217,255,0.2)
+
+        .input:focus,
+        .select:focus {
+            border-color: var(--cyber-blue);
+            box-shadow: 0 0 16px rgba(0, 217, 255, 0.2)
         }
-        .select option{
-            color:#111
+
+        .select option {
+            color: #111
         }
-        .send-options{
-            display:flex;
-            gap:12px;
-            flex-wrap:wrap
+
+        .send-options {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap
         }
-        .option{
-            display:flex;
-            align-items:center;
-            gap:8px;
-            background:rgba(10,14,23,0.6);
-            border:1px solid rgba(0,217,255,0.24);
-            border-radius:10px;
-            padding:10px 12px;
-            cursor:pointer
+
+        .option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(10, 14, 23, 0.6);
+            border: 1px solid rgba(0, 217, 255, 0.24);
+            border-radius: 10px;
+            padding: 10px 12px;
+            cursor: pointer
         }
-        .option input{
-            accent-color:#00d9ff
+
+        .option input {
+            accent-color: #00d9ff
         }
-        .hint{
-            font-size:0.84rem;
-            color:rgba(232,244,248,0.7)
+
+        .hint {
+            font-size: 0.84rem;
+            color: rgba(232, 244, 248, 0.7)
         }
-        .actions{
-            margin-top:24px;
-            display:flex;
-            justify-content:flex-end
+
+        .actions {
+            margin-top: 24px;
+            display: flex;
+            justify-content: flex-end
         }
-        .launch-btn{
-            padding:13px 22px;
-            border:none;
-            border-radius:10px;
-            background:linear-gradient(135deg,var(--cyber-blue),var(--cyber-purple));
-            color:#0a0e17;font-family:'Orbitron',sans-serif;
-            font-size:0.9rem;
-            font-weight:700;
-            letter-spacing:0.08em;
-            cursor:pointer;
-            box-shadow:0 0 20px rgba(0,217,255,0.3);
-            transition:all 0.25s
+
+        .launch-btn {
+            padding: 13px 22px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--cyber-blue), var(--cyber-purple));
+            color: #0a0e17;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(0, 217, 255, 0.3);
+            transition: all 0.25s
         }
-        .launch-btn:hover{
-            transform:translateY(-2px);
-            box-shadow:0 0 24px rgba(0,217,255,0.55)
+
+        .launch-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 24px rgba(0, 217, 255, 0.55)
         }
-        .notice{
-            margin-top:14px;
-            padding:11px 12px;
-            border:1px dashed rgba(0,255,136,0.45);
-            background:rgba(0,255,136,0.08);
-            border-radius:10px;
-            color:var(--cyber-green);
-            font-size:0.85rem;
-            display:none
+
+        .notice {
+            margin-top: 14px;
+            padding: 11px 12px;
+            border: 1px dashed rgba(0, 255, 136, 0.45);
+            background: rgba(0, 255, 136, 0.08);
+            border-radius: 10px;
+            color: var(--cyber-green);
+            font-size: 0.85rem;
+            display: none
         }
-        .notice.show{
-            display:block
+
+        .notice.show {
+            display: block
         }
-        @media(max-width:760px){
-            body{padding:16px}
-            .topbar{flex-direction:column}
-            .form-grid{grid-template-columns:1fr}
+
+        @media(max-width:760px) {
+            body {
+                padding: 16px
+            }
+
+            .topbar {
+                flex-direction: column
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr
+            }
         }
     </style>
 </head>
+
 <body>
     <div class="grid-bg"></div>
     <div class="container">
@@ -194,7 +239,8 @@
                 <div class="form-grid">
                     <div class="field full">
                         <label class="label" for="campaignName">Campaign Name</label>
-                        <input class="input" id="campaignName" type="text" placeholder="Q2 Credential Awareness Drill" required>
+                        <input class="input" id="campaignName" type="text" placeholder="Q2 Credential Awareness Drill"
+                            required>
                     </div>
 
                     <div class="field">
@@ -247,11 +293,51 @@
     </div>
 
     <script>
-        document.getElementById('campaignForm').addEventListener('submit',function(event){
-            event.preventDefault();
-            var notice=document.getElementById('uiNotice');
-            notice.classList.add('show');
+document.getElementById("campaignForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const campaignName = document.getElementById("campaignName").value;
+    const template = document.getElementById("template").value;
+    const department = document.getElementById("department").value;
+
+    // get logged in user
+    const user = JSON.parse(localStorage.getItem("user"));
+
+    if (!user) {
+        alert("Please login first ❌");
+        window.location.href = "login.html";
+        return;
+    }
+
+    try {
+        const res = await fetch("http://localhost:5000/campaign", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                campaignName,
+                template,
+                department,
+                createdBy: user.email
+            })
         });
-    </script>
+
+        const data = await res.json();
+
+        if (data.message) {
+            alert("Campaign Created Successfully ✅");
+
+            // OPTIONAL: reset form
+            document.getElementById("campaignForm").reset();
+        }
+
+    } catch (error) {
+        console.error(error);
+        alert("Error creating campaign ❌");
+    }
+});
+</script>
 </body>
+
 </html>
