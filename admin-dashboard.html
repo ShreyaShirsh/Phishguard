@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - PhishGuard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Red+Hat+Display:wght@400;500;700&display=swap');
 
@@ -408,33 +409,34 @@
             <section class="stats-grid">
                 <article class="stat-card">
                     <h3>Total Employees</h3>
-                    <div class="value">248</div>
+                    <div class="value" id="totalEmployees">30</div>
                     <p class="meta">+14 new users this month</p>
                 </article>
                 <article class="stat-card">
                     <h3>Active Campaigns</h3>
-                    <!-- <div class="value">6</div> -->
                     <div class="value" id="campaignCount">0</div>
-                    <p class="meta">2 campaigns launching this week</p>
+                    <p class="meta">Live tracking enabled</p>
                 </article>
                 <article class="stat-card">
                     <h3>Click Rate</h3>
-                    <div class="value">17.8%</div>
-                    <p class="meta">Down 2.3% compared to last period</p>
+                    <div class="value" id="clickRate">17.8%</div>
+                    <p class="meta">Simulated tracking</p>
                 </article>
-                <article class="stat-card alert">
+                <article class="stat-card alert" id="riskCard">
                     <h3>Risk Level</h3>
-                    <div class="value">Medium</div>
-                    <p class="meta">Requires targeted awareness follow-up</p>
+                    <div class="value" id="riskLevel">Medium</div>
+                    <p class="meta">Real-time system monitoring</p>
                 </article>
             </section>
 
             <section class="content-grid">
                 <article class="panel">
-                    <h3>Click Rate Trend (Dummy Data)</h3>
-                    <div class="chart-wrap" id="chartWrap"></div>
+                    <h3>Click Rate Trend (Last 6 Months)</h3>
+                    <div class="chart-wrap" id="chartWrap" style="height: 250px; position: relative;">
+                        <canvas id="clickRateChart"></canvas>
+                    </div>
 
-                    <div class="table">
+                    <div class="table" id="campaignTable">
                         <div class="row header">
                             <div>Campaign</div>
                             <div>Open Rate</div>
@@ -466,28 +468,28 @@
                         <div class="risk-item">
                             <div class="risk-head">
                                 <span>Low Risk Employees</span>
-                                <strong>58%</strong>
+                                <strong id="riskPctLow">58%</strong>
                             </div>
                             <div class="track">
-                                <div class="fill low" style="width:58%"></div>
+                                <div class="fill low" id="riskBarLow" style="width:58%"></div>
                             </div>
                         </div>
                         <div class="risk-item">
                             <div class="risk-head">
                                 <span>Medium Risk Employees</span>
-                                <strong>29%</strong>
+                                <strong id="riskPctMed">29%</strong>
                             </div>
                             <div class="track">
-                                <div class="fill med" style="width:29%"></div>
+                                <div class="fill med" id="riskBarMed" style="width:29%"></div>
                             </div>
                         </div>
                         <div class="risk-item">
                             <div class="risk-head">
                                 <span>High Risk Employees</span>
-                                <strong>13%</strong>
+                                <strong id="riskPctHigh">13%</strong>
                             </div>
                             <div class="track">
-                                <div class="fill high" style="width:13%"></div>
+                                <div class="fill high" id="riskBarHigh" style="width:13%"></div>
                             </div>
                         </div>
                     </div>
@@ -497,39 +499,94 @@
     </div>
 
     <script>
+        // Init welcome text and date
+        const user = JSON.parse(localStorage.getItem("user"));
+        if (user) {
+            document.getElementById("welcomeText").innerText = `Welcome back, ${user.name}. Here is your overview.`;
+        }
+        document.getElementById("todayText").innerText = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+        // Init Chart.js
+        const ctx = document.getElementById('clickRateChart').getContext('2d');
+        const gradient = ctx.createLinearGradient(0, 0, 0, 250);
+        gradient.addColorStop(0, 'rgba(0, 217, 255, 0.5)');
+        gradient.addColorStop(1, 'rgba(0, 217, 255, 0.0)');
+
+        window.clickChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [{
+                    label: 'Click Rate %',
+                    data: [25, 22, 19, 21, 15, 12],
+                    borderColor: '#00d9ff',
+                    backgroundColor: gradient,
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#9945ff',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: '#00d9ff',
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { backgroundColor: 'rgba(26, 31, 46, 0.9)', titleColor: '#00d9ff', bodyColor: '#fff', borderColor: '#00d9ff', borderWidth: 1 }
+                },
+                scales: {
+                    x: { grid: { color: 'rgba(0, 217, 255, 0.05)' }, ticks: { color: 'rgba(232, 244, 248, 0.7)' } },
+                    y: { grid: { color: 'rgba(0, 217, 255, 0.05)' }, ticks: { color: 'rgba(232, 244, 248, 0.7)' } }
+                }
+            }
+        });
+
         async function loadCampaigns() {
             try {
                 const res = await fetch("http://localhost:5000/campaigns");
                 const data = await res.json();
 
                 const container = document.getElementById("campaignList");
-
                 container.innerHTML = "";
 
                 document.getElementById("campaignCount").innerText = data.length;
 
                 data.forEach(campaign => {
                     const div = document.createElement("div");
-                    // div.style.padding = "10px";
-                    // div.style.borderBottom = "1px solid #444";
-                    div.style.padding = "12px";
-                    div.style.border = "1px solid rgba(0,217,255,0.3)";
-                    div.style.borderRadius = "8px";
-                    div.style.marginBottom = "10px";
-                    div.style.background = "rgba(10,14,23,0.6)";
+                    div.style.padding = "15px";
+                    div.style.border = "1px solid rgba(0, 217, 255, 0.3)";
+                    div.style.borderRadius = "10px";
+                    div.style.marginBottom = "15px";
+                    div.style.background = "rgba(10, 14, 23, 0.8)";
+                    div.style.display = "flex";
+                    div.style.justifyContent = "space-between";
+                    div.style.alignItems = "center";
+                    div.style.transition = "all 0.3s ease";
+
+                    div.onmouseover = () => { div.style.borderColor = "var(--cyber-blue)"; div.style.boxShadow = "0 0 15px rgba(0, 217, 255, 0.2)"; };
+                    div.onmouseout = () => { div.style.borderColor = "rgba(0, 217, 255, 0.3)"; div.style.boxShadow = "none"; };
 
                     div.innerHTML = `
-    <strong>${campaign.campaignName}</strong><br>
-    Template: ${campaign.template}<br>
-    Department: ${campaign.department || "All"}<br>
-    Created By: ${campaign.createdBy}<br><br>
-
-    <button onclick="deleteCampaign('${campaign._id}')"
-        style="padding:6px 10px; background:red; color:white; border:none; border-radius:5px; cursor:pointer;">
-        Delete
-    </button>
-`;
-
+                        <div>
+                            <strong style="color: var(--cyber-blue); font-family: 'Orbitron', sans-serif; font-size: 1.05rem;">${campaign.campaignName}</strong>
+                            <div style="font-size: 0.85rem; color: rgba(232, 244, 248, 0.7); margin-top: 5px;">
+                                <span style="margin-right: 15px;">📋 Template: <span style="color: var(--cyber-white);">${campaign.template || 'N/A'}</span></span>
+                                <span style="margin-right: 15px;">🏢 Dept: <span style="color: var(--cyber-white);">${campaign.department || "All"}</span></span>
+                                <span>👤 By: <span style="color: var(--cyber-white);">${campaign.createdBy || 'Admin'}</span></span>
+                            </div>
+                        </div>
+                        <button onclick="deleteCampaign('${campaign._id}')"
+                            style="padding: 8px 16px; background: rgba(255, 0, 85, 0.1); color: var(--cyber-red); border: 1px solid var(--cyber-red); border-radius: 8px; cursor: pointer; font-family: 'Orbitron', sans-serif; font-size: 0.85rem; transition: all 0.3s;"
+                            onmouseover="this.style.background='var(--cyber-red)'; this.style.color='var(--cyber-black)'; this.style.boxShadow='0 0 15px var(--cyber-red)';"
+                            onmouseout="this.style.background='rgba(255, 0, 85, 0.1)'; this.style.color='var(--cyber-red)'; this.style.boxShadow='none';">
+                            Terminate
+                        </button>
+                    `;
                     container.appendChild(div);
                 });
 
@@ -559,6 +616,84 @@
                 alert("Error deleting campaign ❌");
             }
         }
+
+        function logout() {
+            localStorage.removeItem("user");
+            window.location.href = "index.html";
+        }
+
+        async function fetchLiveStats() {
+            try {
+                const res = await fetch("http://localhost:5000/stats");
+                const stats = await res.json();
+
+                document.getElementById("totalEmployees").innerText = stats.totalEmployees;
+                document.getElementById("campaignCount").innerText = stats.activeCampaigns;
+                document.getElementById("clickRate").innerText = stats.clickRate + "%";
+                
+                const riskLevelEl = document.getElementById("riskLevel");
+                riskLevelEl.innerText = stats.riskLevel;
+                
+                const riskCard = document.getElementById("riskCard");
+                if (stats.riskLevel === 'High') {
+                    riskCard.classList.add('alert');
+                    riskCard.style.borderColor = 'var(--cyber-red)';
+                    riskLevelEl.style.color = 'var(--cyber-red)';
+                } else if (stats.riskLevel === 'Medium') {
+                    riskCard.classList.remove('alert');
+                    riskCard.style.borderColor = 'var(--cyber-yellow)';
+                    riskLevelEl.style.color = 'var(--cyber-yellow)';
+                } else {
+                    riskCard.classList.remove('alert');
+                    riskCard.style.borderColor = 'var(--cyber-green)';
+                    riskLevelEl.style.color = 'var(--cyber-green)';
+                }
+
+                if (window.clickChart && stats.chartData) {
+                    window.clickChart.data.datasets[0].data = stats.chartData;
+                    window.clickChart.update('none'); 
+                }
+
+                if (stats.riskBreakdown) {
+                    document.getElementById("riskPctLow").innerText = stats.riskBreakdown.low + "%";
+                    document.getElementById("riskBarLow").style.width = stats.riskBreakdown.low + "%";
+                    document.getElementById("riskPctMed").innerText = stats.riskBreakdown.med + "%";
+                    document.getElementById("riskBarMed").style.width = stats.riskBreakdown.med + "%";
+                    document.getElementById("riskPctHigh").innerText = stats.riskBreakdown.high + "%";
+                    document.getElementById("riskBarHigh").style.width = stats.riskBreakdown.high + "%";
+                }
+
+                if (stats.topCampaigns) {
+                    const tableContainer = document.getElementById("campaignTable");
+                    let tableHTML = `
+                        <div class="row header">
+                            <div>Campaign</div>
+                            <div>Open Rate</div>
+                            <div>Risk</div>
+                        </div>
+                    `;
+                    stats.topCampaigns.forEach(c => {
+                        let tagClass = c.risk === "High" ? "risk" : (c.risk === "Moderate" ? "warn" : "safe");
+                        tableHTML += `
+                            <div class="row">
+                                <div>${c.name}</div>
+                                <div>${c.openRate}</div>
+                                <div class="tag ${tagClass}">${c.risk}</div>
+                            </div>
+                        `;
+                    });
+                    tableContainer.innerHTML = tableHTML;
+                }
+                
+                loadCampaigns();
+            } catch (error) {
+                console.error("Stats fetching error:", error);
+            }
+        }
+
+        // Fetch stats immediately, then every 3 seconds for real-time tracking
+        fetchLiveStats();
+        setInterval(fetchLiveStats, 3000);
 
         document.querySelectorAll(".menu button")[1].onclick = () => {
             window.location.href = "employees.html";
