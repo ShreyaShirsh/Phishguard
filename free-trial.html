@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free Trial Training - PhishGuard</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Red+Hat+Display:wght@400;500;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+
+        :root {
+            --cyber-black: #0a0e17;
+            --cyber-blue: #00d9ff;
+            --cyber-red: #ff0055;
+            --cyber-purple: #9945ff;
+            --cyber-green: #00ff88;
+            --cyber-white: #e8f4f8
+        }
+
+        body {
+            font-family: 'Red Hat Display', sans-serif;
+            background: var(--cyber-black);
+            color: var(--cyber-white);
+            overflow-x: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .cyber-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: linear-gradient(rgba(0, 217, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 217, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridScroll 20s linear infinite;
+            pointer-events: none;
+            z-index: 0
+        }
+
+        @keyframes gridScroll {
+            0% { transform: translateY(0) }
+            100% { transform: translateY(50px) }
+        }
+
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(0, 217, 255, 0.02) 50%, transparent 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.5
+        }
+
+        .container {
+            position: relative;
+            z-index: 2;
+            max-width: 800px;
+            width: 100%;
+            padding: 2rem;
+            background: rgba(26, 31, 46, 0.8);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--cyber-blue);
+            border-radius: 20px;
+            box-shadow: 0 0 40px rgba(0, 217, 255, 0.3);
+            text-align: center;
+        }
+
+        .title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--cyber-blue), var(--cyber-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+        }
+
+        .description {
+            font-size: 1.1rem;
+            color: rgba(232, 244, 248, 0.8);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .simulation-box {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(0, 217, 255, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: left;
+            margin-bottom: 20px;
+        }
+
+        .email-header {
+            border-bottom: 1px solid rgba(0, 217, 255, 0.2);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .email-header p {
+            margin: 5px 0;
+            font-size: 0.95rem;
+        }
+
+        .email-header strong {
+            color: var(--cyber-blue);
+        }
+
+        .email-body {
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .btn-phish {
+            background: transparent;
+            color: var(--cyber-red);
+            border: 2px solid var(--cyber-red);
+        }
+
+        .btn-phish:hover {
+            background: var(--cyber-red);
+            color: var(--cyber-black);
+            box-shadow: 0 0 20px var(--cyber-red);
+        }
+
+        .btn-safe {
+            background: transparent;
+            color: var(--cyber-green);
+            border: 2px solid var(--cyber-green);
+        }
+
+        .btn-safe:hover {
+            background: var(--cyber-green);
+            color: var(--cyber-black);
+            box-shadow: 0 0 20px var(--cyber-green);
+        }
+
+        .result-message {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .btn-register {
+            display: none;
+            margin-top: 20px;
+            padding: 1rem 3rem;
+            background: linear-gradient(135deg, var(--cyber-blue), var(--cyber-purple));
+            border: none;
+            border-radius: 8px;
+            color: var(--cyber-black);
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            cursor: pointer;
+            text-decoration: none;
+            box-shadow: 0 0 20px rgba(0, 217, 255, 0.4);
+        }
+        
+    </style>
+</head>
+
+<body>
+    <div class="cyber-grid"></div>
+    <div class="scanlines"></div>
+
+    <div class="container" id="mainContainer">
+        <h1 class="title">Interactive Training</h1>
+        <p class="description">Analyze the email below. Is it safe to click the link or is it a phishing attempt?</p>
+
+        <div class="simulation-box">
+            <div class="email-header">
+                <p><strong>From:</strong> IT Support &lt;it-dept@phishguard-security.net&gt;</p>
+                <p><strong>To:</strong> Employee</p>
+                <p><strong>Subject:</strong> URGENT: Mandatory Password Reset Required</p>
+            </div>
+            <div class="email-body">
+                <p>Dear Employee,</p><br>
+                <p>We have detected suspicious activity on your account. To prevent immediate suspension, you must verify your credentials within 24 hours.</p><br>
+                <p><a href="#" style="color: #00d9ff; text-decoration: underline;">Click here to secure your account</a></p><br>
+                <p>Thank you,<br>IT Security Team</p>
+            </div>
+        </div>
+
+        <div class="buttons" id="actionButtons">
+            <button class="btn btn-phish" onclick="handleChoice(true)">It's Phishing</button>
+            <button class="btn btn-safe" onclick="handleChoice(false)">It's Safe</button>
+        </div>
+
+        <div class="result-message" id="resultMessage"></div>
+        <a href="register.html" class="btn-register" id="registerBtn">Register for Full Access</a>
+    </div>
+
+    <script>
+        function handleChoice(isPhishing) {
+            const actionButtons = document.getElementById('actionButtons');
+            const resultMessage = document.getElementById('resultMessage');
+            const registerBtn = document.getElementById('registerBtn');
+
+            actionButtons.style.display = 'none';
+            resultMessage.style.display = 'block';
+            registerBtn.style.display = 'inline-block';
+
+            // Mark trial as used
+            localStorage.setItem('phishguard_free_trial_used', 'true');
+
+            if (isPhishing) {
+                resultMessage.style.backgroundColor = 'rgba(0, 255, 136, 0.1)';
+                resultMessage.style.border = '2px solid var(--cyber-green)';
+                resultMessage.style.color = 'var(--cyber-green)';
+                resultMessage.innerHTML = '<strong>Correct!</strong> Great job spotting the fake sender domain and urgent tone. You have completed the free trial.';
+            } else {
+                resultMessage.style.backgroundColor = 'rgba(255, 0, 85, 0.1)';
+                resultMessage.style.border = '2px solid var(--cyber-red)';
+                resultMessage.style.color = 'var(--cyber-red)';
+                resultMessage.innerHTML = '<strong>Incorrect.</strong> This was a phishing attempt. Look closely at the sender domain (phishguard-security.net is fake) and the urgent request to click a link. You have completed the free trial.';
+            }
+        }
+    </script>
+</body>
+
+</html>

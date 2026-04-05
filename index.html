@@ -415,6 +415,31 @@
                 width: 100%
             }
         }
+
+        .pricing-section { padding: 100px 0; }
+        .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; margin-top: 3rem; align-items: center; }
+        .pricing-card { background: rgba(26, 31, 46, 0.6); padding: 2.5rem; border-radius: 12px; border: 2px solid rgba(0, 217, 255, 0.2); transition: all 0.3s ease; text-align: center; }
+        .pricing-card:hover { transform: translateY(-10px); box-shadow: 0 0 30px rgba(0, 217, 255, 0.2); border-color: var(--cyber-blue); }
+        .pricing-card.premium { border-color: var(--cyber-purple); transform: scale(1.05); background: rgba(36, 21, 66, 0.6); box-shadow: 0 0 30px rgba(153, 69, 255, 0.2); }
+        .pricing-card.premium:hover { transform: scale(1.05) translateY(-10px); box-shadow: 0 0 40px rgba(153, 69, 255, 0.4); border-color: var(--cyber-purple); }
+        @media(max-width:768px) { .pricing-card.premium { transform: scale(1); } .pricing-card.premium:hover { transform: translateY(-10px); } }
+        .pricing-title { font-family: 'Orbitron', sans-serif; font-size: 1.5rem; color: var(--cyber-blue); margin-bottom: 1rem; }
+        .pricing-card.premium .pricing-title { color: var(--cyber-purple); }
+        .pricing-price { font-family: 'Orbitron', sans-serif; font-size: 3rem; font-weight: 900; margin-bottom: 1rem; }
+        .pricing-desc { opacity: 0.8; margin-bottom: 2rem; font-size: 0.95rem; }
+        .pricing-features { list-style: none; margin-bottom: 2rem; text-align: left; }
+        .pricing-features li { margin-bottom: 1rem; padding-left: 1.5rem; position: relative; opacity: 0.9; }
+        .pricing-features li::before { content: '✓'; position: absolute; left: 0; color: var(--cyber-green); font-weight: bold; }
+        
+        .contact-section { padding: 100px 0; background: rgba(26, 31, 46, 0.3); }
+        .contact-form { max-width: 600px; margin: 0 auto; background: rgba(26, 31, 46, 0.6); padding: 2.5rem; border-radius: 12px; border: 2px solid rgba(0, 217, 255, 0.2); }
+        .form-group { margin-bottom: 1.5rem; text-align: left; }
+        .form-label { display: block; margin-bottom: 0.5rem; color: var(--cyber-blue); font-family: 'Orbitron', sans-serif; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.1em; }
+        .form-input { width: 100%; padding: 1rem; background: rgba(0,0,0,0.3); border: 1px solid rgba(0, 217, 255, 0.3); border-radius: 8px; color: var(--cyber-white); font-family: 'Red Hat Display', sans-serif; transition: all 0.3s ease; }
+        .form-input:focus { outline: none; border-color: var(--cyber-blue); box-shadow: 0 0 15px rgba(0, 217, 255, 0.3); background: rgba(0,0,0,0.5); }
+        .btn-submit { width: 100%; padding: 1rem; background: linear-gradient(135deg, var(--cyber-blue), var(--cyber-purple)); border: none; border-radius: 8px; color: var(--cyber-black); font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; transition: all 0.3s ease; text-decoration: none; display: inline-block; }
+        .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 0 20px rgba(0, 217, 255, 0.4); }
+
     </style>
 </head>
 
@@ -422,7 +447,7 @@
     <div class="cyber-grid"></div>
     <div class="scanlines"></div>
 
-    <section class="hero-section">
+    <section class="hero-section" id="about">
         <div class="container">
             <h1 class="project-title">PHISHGUARD</h1>
             <p class="subtitle">Security Training System</p>
@@ -461,7 +486,7 @@
         </div>
     </section>
 
-    <section class="features-section">
+    <section class="features-section" id="features">
         <div class="container">
             <h2 class="section-title">Why Choose PhishGuard?</h2>
             <div class="features-grid">
@@ -544,14 +569,82 @@
         </div>
     </section>
 
-    <section class="cta-section">
+    <section class="pricing-section" id="pricing">
+        <div class="container">
+            <h2 class="section-title">Transparent Pricing</h2>
+            <div class="pricing-grid">
+                <div class="pricing-card">
+                    <h3 class="pricing-title">Starter</h3>
+                    <div class="pricing-price">$0</div>
+                    <p class="pricing-desc">Perfect for small teams getting started.</p>
+                    <ul class="pricing-features">
+                        <li>Up to 10 Employees</li>
+                        <li>Basic Phishing Templates</li>
+                        <li>Standard Support</li>
+                    </ul>
+                    <a href="register.html" class="btn-primary" style="padding: 1rem 2rem; font-size: 1rem;">Get Started</a>
+                </div>
+                <div class="pricing-card premium">
+                    <h3 class="pricing-title">Professional</h3>
+                    <div class="pricing-price">$5<span style="font-size: 1rem; opacity: 0.7;">/user/mo</span></div>
+                    <p class="pricing-desc">For growing organizations needing deep insights.</p>
+                    <ul class="pricing-features">
+                        <li>Up to 500 Employees</li>
+                        <li>Advanced AI Simulations</li>
+                        <li>Detailed Analytics</li>
+                        <li>Priority Email Support</li>
+                    </ul>
+                    <a href="register.html" class="btn-submit">Choose Pro</a>
+                </div>
+                <div class="pricing-card">
+                    <h3 class="pricing-title">Enterprise</h3>
+                    <div class="pricing-price">Custom</div>
+                    <p class="pricing-desc">Full-scale training and reporting suite.</p>
+                    <ul class="pricing-features">
+                        <li>Unlimited Employees</li>
+                        <li>Custom Phishing Scenarios</li>
+                        <li>API Access & Integrations</li>
+                        <li>24/7 Dedicated Support</li>
+                    </ul>
+                    <a href="#contact" class="btn-secondary" style="padding: 1rem 2rem; font-size: 1rem;">Contact Us</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="contact-section" id="contact">
+        <div class="container" style="text-align: center;">
+            <h2 class="section-title">Get In Touch</h2>
+            <p style="margin-bottom: 2rem; color: rgba(232, 244, 248, 0.8);">Have questions about our Enterprise plans or need support? Send us a message.</p>
+            <form class="contact-form" onsubmit="event.preventDefault(); alert('Message sent successfully! Our team will get back to you shortly.');">
+                <div class="form-group">
+                    <label class="form-label">Name</label>
+                    <input type="text" class="form-input" placeholder="Your Name" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-input" placeholder="Your Email" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Message</label>
+                    <textarea rows="4" class="form-input" placeholder="How can we help?" required></textarea>
+                </div>
+                <button type="submit" class="btn-submit">Send Message</button>
+            </form>
+        </div>
+    </section>
+
+    <section class="cta-section" id="cta">
         <div class="container">
             <h2 class="cta-title">Ready to Strengthen Your Security?</h2>
             <p class="cta-description">
                 Join thousands of organizations protecting their workforce from phishing attacks.
                 Get started today with our free trial.
             </p>
-            <a href="register.html" class="btn-primary">Start Free Trial</a>
+            <p class="cta-description" style="font-size: 0.95rem; color: var(--cyber-yellow); margin-bottom: 2rem;">
+                * Employees can experience the free trial training only once. Registration is required for continued access.
+            </p>
+            <a href="#" onclick="startFreeTrial(event)" class="btn-primary">Start Free Trial</a>
         </div>
     </section>
 
@@ -559,17 +652,30 @@
         <div class="container">
             <div class="footer-brand">PHISHGUARD</div>
             <div class="footer-links">
-                <a href="#">About</a>
-                <a href="#">Features</a>
-                <a href="#">Pricing</a>
-                <a href="#">Contact</a>
-                <a href="#">Privacy</a>
-                <a href="#">Terms</a>
+                <a href="#about">About</a>
+                <a href="#features">Features</a>
+                <a href="#pricing">Pricing</a>
+                <a href="#contact">Contact</a>
+                <a href="javascript:void(0)">Privacy</a>
+                <a href="javascript:void(0)">Terms</a>
             </div>
             <div class="footer-bottom">© 2024 PhishGuard. All rights reserved. | Built for Enterprise Security Training
             </div>
         </div>
     </footer>
+
+    <script>
+        function startFreeTrial(event) {
+            event.preventDefault();
+            const hasUsedTrial = localStorage.getItem('phishguard_free_trial_used');
+            if (hasUsedTrial) {
+                alert('You have already used your one-time free trial. Please register to continue training.');
+                window.location.href = 'register.html';
+            } else {
+                window.location.href = 'free-trial.html';
+            }
+        }
+    </script>
 </body>
 
 </html>
