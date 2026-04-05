@@ -276,26 +276,69 @@
 
     <script>
         // Load user data to prevent lockouts and setup profile
-        const user = JSON.parse(localStorage.getItem("user"));
+        const localUser = JSON.parse(localStorage.getItem("user"));
         
-        if (user) {
-            document.getElementById("employeeName").innerText = `Welcome, ${user.name}`;
+        if (localUser) {
+            document.getElementById("employeeName").innerText = `Welcome, ${localUser.name}`;
             
-            // Randomly mock a safe score for employees, or load from DB if available later
-            const score = user.riskScore ? user.riskScore : Math.floor(Math.random() * 20) + 10;
-            const scoreDisplay = document.getElementById("riskScoreDisplay");
-            scoreDisplay.innerText = score;
+            const updateDashboard = (score) => {
+                const scoreDisplay = document.getElementById("riskScoreDisplay");
+                scoreDisplay.innerText = score;
+                
+                const circle = scoreDisplay.parentElement;
+                
+                // Reset styles
+                circle.style.borderColor = "var(--cyber-blue)";
+                circle.style.boxShadow = "0 0 30px rgba(0, 217, 255, 0.2)";
+                scoreDisplay.style.color = "var(--cyber-white)";
+                
+                if (score > 60) {
+                    circle.style.borderColor = "var(--cyber-red)";
+                    circle.style.boxShadow = "0 0 30px rgba(255, 0, 85, 0.4)";
+                    scoreDisplay.style.color = "var(--cyber-red)";
+                } else if (score > 30) {
+                    circle.style.borderColor = "var(--cyber-yellow)";
+                    circle.style.boxShadow = "0 0 30px rgba(255, 213, 79, 0.4)";
+                    scoreDisplay.style.color = "var(--cyber-yellow)";
+                } else {
+                    circle.style.borderColor = "var(--cyber-green)";
+                    circle.style.boxShadow = "0 0 30px rgba(0, 255, 136, 0.4)";
+                    scoreDisplay.style.color = "var(--cyber-green)";
+                }
+            };
             
-            const circle = scoreDisplay.parentElement;
-            if (score > 60) {
-                circle.style.borderColor = "var(--cyber-red)";
-                circle.style.boxShadow = "0 0 30px rgba(255, 0, 85, 0.4)";
-                scoreDisplay.style.color = "var(--cyber-red)";
-            } else if (score > 30) {
-                circle.style.borderColor = "var(--cyber-yellow)";
-                circle.style.boxShadow = "0 0 30px rgba(255, 213, 79, 0.4)";
-                scoreDisplay.style.color = "var(--cyber-yellow)";
-            }
+            // Initial fallback render
+            let currentScore = localUser.riskScore ? localUser.riskScore : Math.floor(Math.random() * 20) + 10;
+            updateDashboard(currentScore);
+            
+            // Function to fetch live details
+            const fetchLiveDetails = async () => {
+                try {
+                    const res = await fetch(`http://localhost:5000/employee/${localUser.email}`);
+                    if (!res.ok) throw new Error("Failed to fetch live details");
+                    
+                    const user = await res.json();
+                    if (!user) return; // fallback to local user data if failed
+                    
+                    document.getElementById("employeeName").innerText = `Welcome, ${user.name}`;
+                    
+                    let newScore = user.riskScore ? user.riskScore : currentScore;
+                    updateDashboard(newScore);
+                    
+                    // Update the local storage user object to keep it up to date
+                    localUser.riskScore = newScore;
+                    localUser.name = user.name;
+                    localStorage.setItem("user", JSON.stringify(localUser));
+
+                } catch (err) {
+                    console.error("Error fetching live details:", err);
+                }
+            };
+            
+            // Fetch immediately, then setup interval to poll for changes
+            fetchLiveDetails();
+            setInterval(fetchLiveDetails, 5000);
+
         } else {
             // Failsafe if accessed directly without login
             window.location.href = "login.html";
