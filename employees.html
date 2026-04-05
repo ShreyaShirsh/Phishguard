@@ -186,7 +186,7 @@
                 });
             } catch (error) {
                 console.error("Error fetching employees:", error);
-                document.getElementById("employeeTableBody").innerHTML = "<tr><td colspan='4' style='text-align: center; color: var(--cyber-red); padding: 2rem;'>Error: Could not retrieve connection to MongoDB.</td></tr>";
+                document.getElementById("employeeTableBody").innerHTML = "<tr><td colspan='4' style='text-align: center; color: var(--cyber-red); padding: 2rem;'>Error: Could not connect to the Backend server. Ensure 'node server.js' and MongoDB are running.</td></tr>";
             }
         }
         

@@ -89,7 +89,7 @@
 
         .kpi-grid {
             display: grid;
-            grid-template-columns: repeat(2, minmax(180px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 16px;
             margin-bottom: 18px
         }
@@ -219,7 +219,7 @@
         <header class="topbar">
             <div>
                 <h1>Security Analytics</h1>
-                <p>Dummy insights for phishing simulation performance and user behavior trends.</p>
+                <p>Real-time insights for phishing simulation performance and user behavior trends.</p>
             </div>
             <a href="admin-dashboard.html">Back to Dashboard</a>
         </header>
@@ -227,18 +227,28 @@
         <section class="kpi-grid">
             <article class="kpi-card">
                 <h3>Click Rate</h3>
-                <div class="value">17.8%</div>
-                <p class="meta">Dummy metric: improved by 2.3% from last cycle.</p>
+                <div class="value" id="clickRateValue">--.-%</div>
+                <p class="meta">Current enterprise click rate</p>
             </article>
-            <article class="kpi-card alert">
-                <h3>Credential Submission Rate</h3>
-                <div class="value">9.4%</div>
-                <p class="meta">Dummy metric: down from 11.1% after awareness training.</p>
+            <article class="kpi-card">
+                <h3>Risk Level</h3>
+                <div class="value" id="riskLevelValue">--</div>
+                <p class="meta">Average organizational risk</p>
+            </article>
+            <article class="kpi-card">
+                <h3>Total Employees</h3>
+                <div class="value" id="totalEmployeesValue">--</div>
+                <p class="meta">Active users</p>
+            </article>
+            <article class="kpi-card">
+                <h3>Active Campaigns</h3>
+                <div class="value" id="activeCampaignsValue">--</div>
+                <p class="meta">Currently running simulations</p>
             </article>
         </section>
 
         <section class="panel">
-            <h3>Risk Score Graph (Dummy Data)</h3>
+            <h3>Risk Score Graph (Real-time)</h3>
             <div class="chart-area">
                 <div class="graph-wrap">
                     <div class="y-labels">
@@ -262,11 +272,8 @@
     </div>
 
     <script>
-        // var labels=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug'];
-        // var riskScores=[74,68,64,58,55,49,46,42];
-        // var targetScore=50;
-        var labels = [];
-        var riskScores = [];
+        var labels = ['T-5', 'T-4', 'T-3', 'T-2', 'T-1', 'Now'];
+        var riskScores = [0, 0, 0, 0, 0, 0];
         var targetScore = 50;
 
         async function loadAnalytics() {
@@ -274,20 +281,29 @@
                 const res = await fetch("http://localhost:5000/stats");
                 const data = await res.json();
 
-                // Example: use real user risk scores
-                riskScores = data.riskScores;   // 👈 from backend
-                labels = data.labels;           // optional
+                document.getElementById('clickRateValue').innerText = data.clickRate + '%';
+                
+                const riskLevelEl = document.getElementById('riskLevelValue');
+                riskLevelEl.innerText = data.riskLevel;
+                if(data.riskLevel === 'High') {
+                    riskLevelEl.closest('.kpi-card').classList.add('alert');
+                } else {
+                    riskLevelEl.closest('.kpi-card').classList.remove('alert');
+                }
 
-                // drawGraph(); // redraw graph with real data
-                loadAnalytics();
+                document.getElementById('totalEmployeesValue').innerText = data.totalEmployees;
+                document.getElementById('activeCampaignsValue').innerText = data.activeCampaigns;
 
+                riskScores = data.chartData.map(Number);
+                drawGraph();
             } catch (err) {
-                console.error(err);
+                console.error("Error fetching analytics:", err);
             }
         }
 
         function drawGraph() {
             var svg = document.getElementById('riskGraph');
+            if(!svg) return;
             var width = 900;
             var height = 260;
             var left = 30;
@@ -301,7 +317,8 @@
                 return left + (index * (chartW / (labels.length - 1)));
             }
             function yPos(value) {
-                return top + ((100 - value) / 100) * chartH;
+                var boundedVal = Math.min(Math.max(value, 0), 100);
+                return top + ((100 - boundedVal) / 100) * chartH;
             }
 
             var grid = '';
@@ -328,7 +345,8 @@
             svg.innerHTML = grid + targetLine + line + points;
         }
 
-        drawGraph();
+        setInterval(loadAnalytics, 2000);
+        loadAnalytics();
     </script>
 </body>
 
