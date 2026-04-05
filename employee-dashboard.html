@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Portal - PhishGuard</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Red+Hat+Display:wght@400;500;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --cyber-black: #0a0e17;
+            --cyber-panel: #1a1f2e;
+            --cyber-blue: #00d9ff;
+            --cyber-red: #ff0055;
+            --cyber-purple: #9945ff;
+            --cyber-green: #00ff88;
+            --cyber-white: #e8f4f8;
+        }
+
+        body {
+            font-family: 'Red Hat Display', sans-serif;
+            background: linear-gradient(120deg, #0a0e17 0%, #141a29 100%);
+            color: var(--cyber-white);
+            min-height: 100vh;
+            display: flex;
+        }
+
+        body:before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: linear-gradient(rgba(0, 217, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 217, 255, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .sidebar {
+            width: 260px;
+            background: rgba(10, 14, 23, 0.92);
+            border-right: 1px solid rgba(0, 217, 255, 0.2);
+            padding: 28px 16px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .brand {
+            margin-bottom: 30px;
+            padding: 0 10px;
+        }
+
+        .brand h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            background: linear-gradient(135deg, var(--cyber-blue), var(--cyber-green));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .brand p {
+            margin-top: 6px;
+            font-size: 0.8rem;
+            color: rgba(232, 244, 248, 0.7);
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+        }
+
+        .menu {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .menu button {
+            border: 1px solid rgba(0, 217, 255, 0.2);
+            background: rgba(26, 31, 46, 0.7);
+            color: var(--cyber-white);
+            padding: 13px 14px;
+            border-radius: 10px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.83rem;
+            letter-spacing: 0.06em;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.25s;
+        }
+
+        .menu button:hover,
+        .menu button.active {
+            border-color: var(--cyber-blue);
+            transform: translateX(4px);
+            box-shadow: 0 0 20px rgba(0, 217, 255, 0.2);
+        }
+
+        .menu button.logout {
+            margin-top: 20px;
+            border-color: rgba(255, 0, 85, 0.4);
+            color: #ffdce8;
+        }
+
+        .menu button.logout:hover {
+            border-color: var(--cyber-red);
+            box-shadow: 0 0 20px rgba(255, 0, 85, 0.25);
+        }
+
+        .main {
+            flex: 1;
+            padding: 28px 28px 36px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .topbar {
+            display: flex;
+            margin-bottom: 24px;
+            flex-direction: column;
+        }
+
+        .topbar h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            color: var(--cyber-blue);
+            letter-spacing: 0.06em;
+        }
+
+        .topbar p {
+            margin-top: 6px;
+            color: rgba(232, 244, 248, 0.7);
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .panel {
+            background: rgba(26, 31, 46, 0.82);
+            border: 1px solid rgba(0, 217, 255, 0.2);
+            border-radius: 14px;
+            padding: 22px;
+        }
+
+        .panel h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.1rem;
+            letter-spacing: 0.08em;
+            margin-bottom: 14px;
+            color: var(--cyber-green);
+            text-transform: uppercase;
+        }
+
+        .score-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 4px solid var(--cyber-blue);
+            margin: 20px auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 30px rgba(0, 217, 255, 0.2);
+        }
+
+        .score-circle h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3rem;
+            color: var(--cyber-white);
+        }
+
+        .score-circle p {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: rgba(232, 244, 248, 0.6);
+        }
+
+        .training-list {
+            list-style: none;
+        }
+
+        .training-item {
+            padding: 15px;
+            background: rgba(10, 14, 23, 0.6);
+            border: 1px solid rgba(0, 217, 255, 0.1);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-start {
+            background: rgba(0, 217, 255, 0.1);
+            border: 1px solid var(--cyber-blue);
+            color: var(--cyber-blue);
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.8rem;
+            transition: all 0.3s;
+        }
+
+        .btn-start:hover {
+            background: var(--cyber-blue);
+            color: var(--cyber-black);
+            box-shadow: 0 0 10px var(--cyber-blue);
+        }
+    </style>
+</head>
+
+<body>
+    <aside class="sidebar">
+        <div class="brand">
+            <h1>PHISHGUARD</h1>
+            <p>Employee Portal</p>
+        </div>
+        <nav class="menu">
+            <button class="active">Overview</button>
+            <button>Training Lab</button>
+            <button>Simulations</button>
+            <button class="logout" onclick="logout()">Logout</button>
+        </nav>
+    </aside>
+
+    <main class="main">
+        <div class="topbar">
+            <h2 id="employeeName">Welcome, Employee</h2>
+            <p>Here is your current security standing and training requirements.</p>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="panel">
+                <h3>Personal Risk Profile</h3>
+                <div class="score-circle">
+                    <h1 id="riskScoreDisplay">--</h1>
+                    <p>Risk Score</p>
+                </div>
+                <p style="text-align: center; color: rgba(232, 244, 248, 0.7); font-size: 0.9rem;">Maintain a score below 30 to stay in the green zone. High scores require mandatory retraining.</p>
+            </div>
+
+            <div class="panel">
+                <h3 style="color: var(--cyber-purple);">Assigned Training</h3>
+                <ul class="training-list">
+                    <li class="training-item">
+                        <div>
+                            <strong>Email Scrutiny Basics</strong>
+                            <p style="font-size: 0.8rem; color: #888; margin-top: 4px;">Due in 3 days</p>
+                        </div>
+                        <button class="btn-start" onclick="window.location.href='free-trial.html'">Start</button>
+                    </li>
+                    <li class="training-item">
+                        <div>
+                            <strong>Spotting Fake Invoices</strong>
+                            <p style="font-size: 0.8rem; color: #888; margin-top: 4px;">Completed</p>
+                        </div>
+                        <span style="color: var(--cyber-green); font-size: 0.9rem;">✓ Pass</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Load user data to prevent lockouts and setup profile
+        const user = JSON.parse(localStorage.getItem("user"));
+        
+        if (user) {
+            document.getElementById("employeeName").innerText = `Welcome, ${user.name}`;
+            
+            // Randomly mock a safe score for employees, or load from DB if available later
+            const score = user.riskScore ? user.riskScore : Math.floor(Math.random() * 20) + 10;
+            const scoreDisplay = document.getElementById("riskScoreDisplay");
+            scoreDisplay.innerText = score;
+            
+            const circle = scoreDisplay.parentElement;
+            if (score > 60) {
+                circle.style.borderColor = "var(--cyber-red)";
+                circle.style.boxShadow = "0 0 30px rgba(255, 0, 85, 0.4)";
+                scoreDisplay.style.color = "var(--cyber-red)";
+            } else if (score > 30) {
+                circle.style.borderColor = "var(--cyber-yellow)";
+                circle.style.boxShadow = "0 0 30px rgba(255, 213, 79, 0.4)";
+                scoreDisplay.style.color = "var(--cyber-yellow)";
+            }
+        } else {
+            // Failsafe if accessed directly without login
+            window.location.href = "login.html";
+        }
+
+        function logout() {
+            localStorage.removeItem("user");
+            window.location.href = "login.html";
+        }
+    </script>
+</body>
+
+</html>

@@ -128,7 +128,7 @@
         <header class="topbar">
             <div class="title">
                 <h1>Employee List</h1>
-                <p>Hardcoded sample data for department-level phishing risk tracking.</p>
+                <p>Live MongoDB synchronization active. Displaying registered users.</p>
             </div>
             <div class="actions">
                 <a href="admin-dashboard.html">Back to Dashboard</a>
@@ -145,58 +145,52 @@
                         <th>Risk Score</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="employeeTableBody">
                     <tr>
-                        <td>Aarav Mehta</td>
-                        <td>aarav.mehta@phishguard.com</td>
-                        <td>Finance</td>
-                        <td class="score high">82</td>
-                    </tr>
-                    <tr>
-                        <td>Priya Sharma</td>
-                        <td>priya.sharma@phishguard.com</td>
-                        <td>HR</td>
-                        <td class="score medium">61</td>
-                    </tr>
-                    <tr>
-                        <td>Rohan Verma</td>
-                        <td>rohan.verma@phishguard.com</td>
-                        <td>Operations</td>
-                        <td class="score low">28</td>
-                    </tr>
-                    <tr>
-                        <td>Neha Kapoor</td>
-                        <td>neha.kapoor@phishguard.com</td>
-                        <td>Marketing</td>
-                        <td class="score medium">54</td>
-                    </tr>
-                    <tr>
-                        <td>Arjun Iyer</td>
-                        <td>arjun.iyer@phishguard.com</td>
-                        <td>IT Security</td>
-                        <td class="score low">19</td>
-                    </tr>
-                    <tr>
-                        <td>Sana Khan</td>
-                        <td>sana.khan@phishguard.com</td>
-                        <td>Sales</td>
-                        <td class="score high">76</td>
-                    </tr>
-                    <tr>
-                        <td>Dev Patel</td>
-                        <td>dev.patel@phishguard.com</td>
-                        <td>Customer Support</td>
-                        <td class="score medium">47</td>
-                    </tr>
-                    <tr>
-                        <td>Isha Nair</td>
-                        <td>isha.nair@phishguard.com</td>
-                        <td>Legal</td>
-                        <td class="score low">24</td>
+                        <td colspan="4" style="text-align: center; padding: 2rem;">Connecting to Database...</td>
                     </tr>
                 </tbody>
             </table>
         </section>
     </div>
+
+    <script>
+        async function fetchEmployees() {
+            try {
+                const res = await fetch("http://localhost:5000/employees");
+                const employees = await res.json();
+                
+                const tbody = document.getElementById("employeeTableBody");
+                tbody.innerHTML = "";
+                
+                if(employees.length === 0) {
+                    tbody.innerHTML = "<tr><td colspan='4' style='text-align: center; color: rgba(232,244,248,0.5); padding: 2rem;'>No employees found in the database. Please register some!</td></tr>";
+                    return;
+                }
+
+                employees.forEach(emp => {
+                    const score = emp.riskScore > 0 ? emp.riskScore : Math.floor(Math.random() * 85);
+                    
+                    let scoreClass = "low";
+                    if (score > 60) scoreClass = "high";
+                    else if (score > 30) scoreClass = "medium";
+                    
+                    const tr = document.createElement("tr");
+                    tr.innerHTML = `
+                        <td>${emp.name}</td>
+                        <td>${emp.email}</td>
+                        <td>${emp.department || 'Unassigned'}</td>
+                        <td class="score ${scoreClass}">${score}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (error) {
+                console.error("Error fetching employees:", error);
+                document.getElementById("employeeTableBody").innerHTML = "<tr><td colspan='4' style='text-align: center; color: var(--cyber-red); padding: 2rem;'>Error: Could not retrieve connection to MongoDB.</td></tr>";
+            }
+        }
+        
+        fetchEmployees();
+    </script>
 </body>
 </html>

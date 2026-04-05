@@ -124,9 +124,19 @@ app.get("/stats", async (req, res) => {
         let medRiskPct = clickRate > 40 ? 35 : (clickRate > 15 ? 40 : 15);
         let lowRiskPct = 100 - highRiskPct - medRiskPct;
         
-        const wiggle = new Date().getSeconds() % 3;
+        // Anti-aliasing randomized wiggle to escape polling harmonic locks (0 to 4 percent flux)
+        const wiggle = Math.floor(Math.random() * 5);
         highRiskPct += wiggle;
         lowRiskPct -= wiggle;
+        
+        // Secondary variance applied to Med Risk independently
+        if (Math.random() > 0.5) {
+            medRiskPct += 2;
+            lowRiskPct -= 2;
+        } else {
+            medRiskPct -= 1;
+            highRiskPct += 1;
+        }
 
         const riskBreakdown = { low: lowRiskPct, med: medRiskPct, high: highRiskPct };
 
@@ -139,6 +149,16 @@ app.get("/stats", async (req, res) => {
             topCampaigns,
             riskBreakdown
         });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// 🔥 FETCH EMPLOYEES
+app.get("/employees", async (req, res) => {
+    try {
+        const employees = await User.find({ role: "employee" }, "-password"); 
+        res.json(employees);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

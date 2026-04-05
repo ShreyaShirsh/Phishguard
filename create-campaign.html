@@ -229,7 +229,7 @@
         <header class="topbar">
             <div>
                 <h1>Create Campaign</h1>
-                <p>Configure a new phishing simulation campaign (UI only, no backend).</p>
+                <p>Configure and launch a live simulated phishing campaign.</p>
             </div>
             <a href="admin-dashboard.html">Back to Dashboard</a>
         </header>
@@ -252,6 +252,28 @@
                             <option>Package Delivery Alert</option>
                             <option>Urgent HR Policy Update</option>
                             <option>Custom Template (Draft)</option>
+                            <option>Salary Credit Issue</option>
+                            <option>Reimbursement Approval Required</option>
+                            <option>Tax Document Submission</option>
+                            <option>Bank Account Verification</option>
+                            <option>Unexpected Bonus Notification</option>
+                            <option>Unusual Login Attempt</option>
+                            <option>Account Locked - Immediate Action</option>
+                            <option>Courier Delivery Failed</option>
+                            <option>Package Held at Customs</option>
+                            <option>Shipment Tracking Update</option>
+                            <option>Delivery Address Confirmation</option>
+                            <option>HR Document Submission</option>
+                            <option>Leave Approval Update</option>
+                            <option>Policy Violation Notice</option>
+                            <option>Shared Google Drive Document</option>
+                            <option>Confidential File Access</option>
+                            <option>Updated Contract Document</option>
+                            <option>Invoice Attachment Download</option>
+                            <option>Gift Card Purchase Request</option>
+                            <option>Email Storage Full Warning</option>
+                            <option>Cloud Storage Expiry Notice</option>
+                            <option>Single Sign-On (SSO) Expiry</option>
                         </select>
                     </div>
 
@@ -287,57 +309,57 @@
                 <div class="actions">
                     <button type="submit" class="launch-btn">Launch Campaign</button>
                 </div>
-                <div id="uiNotice" class="notice">UI mode only: no campaign has been sent to a backend service.</div>
+                <!-- Notice block removed -->
             </form>
         </section>
     </div>
 
     <script>
-document.getElementById("campaignForm").addEventListener("submit", async function (e) {
-    e.preventDefault();
+        document.getElementById("campaignForm").addEventListener("submit", async function (e) {
+            e.preventDefault();
 
-    const campaignName = document.getElementById("campaignName").value;
-    const template = document.getElementById("template").value;
-    const department = document.getElementById("department").value;
+            const campaignName = document.getElementById("campaignName").value;
+            const template = document.getElementById("template").value;
+            const department = document.getElementById("department").value;
 
-    // get logged in user
-    const user = JSON.parse(localStorage.getItem("user"));
+            // get logged in user
+            const user = JSON.parse(localStorage.getItem("user"));
 
-    if (!user) {
-        alert("Please login first ❌");
-        window.location.href = "login.html";
-        return;
-    }
+            if (!user) {
+                alert("Please login first ❌");
+                window.location.href = "login.html";
+                return;
+            }
 
-    try {
-        const res = await fetch("http://localhost:5000/campaign", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                campaignName,
-                template,
-                department,
-                createdBy: user.email
-            })
+            try {
+                const res = await fetch("http://localhost:5000/campaign", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        campaignName,
+                        template,
+                        department,
+                        createdBy: user.email
+                    })
+                });
+
+                const data = await res.json();
+
+                if (data.message) {
+                    alert("Campaign Created Successfully ✅");
+
+                    // OPTIONAL: reset form
+                    document.getElementById("campaignForm").reset();
+                }
+
+            } catch (error) {
+                console.error(error);
+                alert("Error creating campaign ❌");
+            }
         });
-
-        const data = await res.json();
-
-        if (data.message) {
-            alert("Campaign Created Successfully ✅");
-
-            // OPTIONAL: reset form
-            document.getElementById("campaignForm").reset();
-        }
-
-    } catch (error) {
-        console.error(error);
-        alert("Error creating campaign ❌");
-    }
-});
-</script>
+    </script>
 </body>
 
 </html>
