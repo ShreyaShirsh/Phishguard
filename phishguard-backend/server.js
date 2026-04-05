@@ -164,6 +164,16 @@ app.get("/employees", async (req, res) => {
     }
 });
 
+// 🔥 FETCH SINGLE EMPLOYEE BY EMAIL
+app.get("/employee/:email", async (req, res) => {
+    try {
+        const employee = await User.findOne({ email: req.params.email }, "-password");
+        res.json(employee);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 app.listen(5000, () => {
     console.log("Server running on port 5000");
 });
