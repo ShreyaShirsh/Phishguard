@@ -502,7 +502,10 @@
     <script>
         // Init welcome text and date
         const user = JSON.parse(localStorage.getItem("user"));
-        if (user) {
+        const token = localStorage.getItem("phishguard_token");
+        if (!user || user.role !== "admin" || !token) {
+            window.location.href = "login.html";
+        } else {
             document.getElementById("welcomeText").innerText = `Welcome back, ${user.name}. Here is your overview.`;
         }
         document.getElementById("todayText").innerText = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
@@ -549,7 +552,9 @@
 
         async function loadCampaigns() {
             try {
-                const res = await fetch("http://localhost:5000/campaigns");
+                const res = await fetch("http://localhost:5000/campaigns", {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
                 const data = await res.json();
 
                 const container = document.getElementById("campaignList");
@@ -602,7 +607,8 @@
         async function deleteCampaign(id) {
             try {
                 const res = await fetch(`http://localhost:5000/campaign/${id}`, {
-                    method: "DELETE"
+                    method: "DELETE",
+                    headers: { 'Authorization': `Bearer ${token}` }
                 });
 
                 const data = await res.json();
@@ -625,7 +631,9 @@
 
         async function fetchLiveStats() {
             try {
-                const res = await fetch("http://localhost:5000/stats");
+                const res = await fetch("http://localhost:5000/stats", {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
                 const stats = await res.json();
 
                 document.getElementById("totalEmployees").innerText = stats.totalEmployees;

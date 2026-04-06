@@ -329,6 +329,20 @@
     </div>
 
     <script>
+        const roleSelect = document.getElementById("role");
+        const deptSelect = document.getElementById("department");
+
+        roleSelect.addEventListener("change", function() {
+            if (this.value === "admin") {
+                deptSelect.removeAttribute("required");
+                deptSelect.disabled = true;
+                deptSelect.value = "";
+            } else {
+                deptSelect.setAttribute("required", "true");
+                deptSelect.disabled = false;
+            }
+        });
+
         async function handleRegister(event) {
             event.preventDefault();
 
@@ -337,6 +351,9 @@
             const password = document.getElementById("password").value;
             const role = document.getElementById("role").value;
             const department = document.getElementById("department").value;
+
+            document.getElementById("errorMessage").classList.remove("show");
+            document.getElementById("successMessage").classList.remove("show");
 
             try {
                 const res = await fetch("http://localhost:5000/register", {
@@ -356,13 +373,18 @@
                 const data = await res.json();
 
                 if (data.message) {
-                    alert("Registered Successfully ✅");
-                    window.location.href = "login.html";
+                    document.getElementById("successMessage").innerHTML = "Registered Successfully ✅ Redirecting...";
+                    document.getElementById("successMessage").classList.add("show");
+                    setTimeout(() => window.location.href = "login.html", 1500);
+                } else {
+                    document.getElementById("errorMessage").innerHTML = data.error || "Registration failed ❌";
+                    document.getElementById("errorMessage").classList.add("show");
                 }
 
             } catch (error) {
                 console.error(error);
-                alert("Error registering ❌");
+                document.getElementById("errorMessage").innerHTML = "Error connecting to server ❌";
+                document.getElementById("errorMessage").classList.add("show");
             }
         }
     </script>

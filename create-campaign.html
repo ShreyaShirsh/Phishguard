@@ -315,27 +315,51 @@
     </div>
 
     <script>
+        const user = JSON.parse(localStorage.getItem("user"));
+        const token = localStorage.getItem("phishguard_token");
+        if (!user || user.role !== "admin" || !token) {
+            window.location.href = "login.html";
+        }
+
+        const deptSelect = document.getElementById("department");
+        const sendRadios = document.getElementsByName("sendTo");
+
+        deptSelect.disabled = true;
+
+        sendRadios.forEach(radio => {
+            radio.addEventListener("change", function() {
+                if (this.value === "all") {
+                    deptSelect.disabled = true;
+                    deptSelect.value = ""; 
+                } else {
+                    deptSelect.disabled = false;
+                }
+            });
+        });
+
         document.getElementById("campaignForm").addEventListener("submit", async function (e) {
             e.preventDefault();
 
             const campaignName = document.getElementById("campaignName").value;
             const template = document.getElementById("template").value;
-            const department = document.getElementById("department").value;
+            let department = document.getElementById("department").value;
 
-            // get logged in user
-            const user = JSON.parse(localStorage.getItem("user"));
-
-            if (!user) {
-                alert("Please login first ❌");
-                window.location.href = "login.html";
+            const sendToAll = document.querySelector('input[name="sendTo"]:checked').value === "all";
+            if (sendToAll) {
+                department = "All";
+            } else if (!department) {
+                alert("Please select a specific department ❌");
                 return;
             }
+
+
 
             try {
                 const res = await fetch("http://localhost:5000/campaign", {
                     method: "POST",
                     headers: {
-                        "Content-Type": "application/json"
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
                     },
                     body: JSON.stringify({
                         campaignName,

@@ -272,13 +272,21 @@
     </div>
 
     <script>
+        const user = JSON.parse(localStorage.getItem("user"));
+        const token = localStorage.getItem("phishguard_token");
+        if (!user || user.role !== "admin" || !token) {
+            window.location.href = "login.html";
+        }
+
         var labels = ['T-5', 'T-4', 'T-3', 'T-2', 'T-1', 'Now'];
         var riskScores = [0, 0, 0, 0, 0, 0];
         var targetScore = 50;
 
         async function loadAnalytics() {
             try {
-                const res = await fetch("http://localhost:5000/stats");
+                const res = await fetch("http://localhost:5000/stats", {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
                 const data = await res.json();
 
                 document.getElementById('clickRateValue').innerText = data.clickRate + '%';

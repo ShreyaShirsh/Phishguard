@@ -219,6 +219,177 @@
             color: var(--cyber-black);
             box-shadow: 0 0 10px var(--cyber-blue);
         }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        .training-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .training-card {
+            background: rgba(26, 31, 46, 0.82);
+            border: 1px solid rgba(0, 217, 255, 0.2);
+            border-radius: 12px;
+            padding: 18px;
+            transition: all 0.3s ease;
+        }
+
+        .training-card:hover {
+            border-color: var(--cyber-blue);
+            box-shadow: 0 0 15px rgba(0, 217, 255, 0.2);
+        }
+
+        .training-card h4 {
+            color: var(--cyber-blue);
+            margin-bottom: 8px;
+            font-family: 'Orbitron', sans-serif;
+        }
+        
+        .training-card p {
+            font-size: 0.85rem;
+            color: rgba(232, 244, 248, 0.7);
+            margin-bottom: 15px;
+        }
+
+        .btn-action {
+            background: linear-gradient(135deg, var(--cyber-blue), var(--cyber-purple));
+            border: none;
+            color: var(--cyber-black);
+            padding: 10px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: bold;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .btn-action:hover {
+            box-shadow: 0 0 15px rgba(0, 217, 255, 0.5);
+        }
+
+        .inbox-list { margin-top: 20px; }
+
+        .email-item {
+            background: rgba(26, 31, 46, 0.82);
+            border-left: 4px solid var(--cyber-blue);
+            border-right: 1px solid rgba(0, 217, 255, 0.2);
+            border-top: 1px solid rgba(0, 217, 255, 0.2);
+            border-bottom: 1px solid rgba(0, 217, 255, 0.2);
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .email-item.safe { border-left-color: var(--cyber-green); }
+        .email-item.risk { border-left-color: var(--cyber-red); }
+
+        .email-content h4 {
+            font-size: 1.05rem;
+            margin-bottom: 4px;
+        }
+
+        .email-content p {
+            font-size: 0.85rem;
+            color: rgba(232, 244, 248, 0.6);
+        }
+
+        .email-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-report {
+            background: rgba(0, 255, 136, 0.1);
+            color: var(--cyber-green);
+            border: 1px solid var(--cyber-green);
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-report:hover {
+            background: var(--cyber-green);
+            color: var(--cyber-black);
+        }
+
+        .btn-click {
+            background: rgba(255, 0, 85, 0.1);
+            color: var(--cyber-red);
+            border: 1px solid var(--cyber-red);
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-click:hover {
+            background: var(--cyber-red);
+            color: var(--cyber-black);
+        }
+        
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(10, 14, 23, 0.85);
+            backdrop-filter: blur(5px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .modal-card {
+            background: rgba(26, 31, 46, 0.95);
+            border: 1px solid var(--cyber-blue);
+            border-radius: 14px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 0 40px rgba(0, 217, 255, 0.2);
+            position: relative;
+        }
+        
+        .modal-card h2 {
+            color: var(--cyber-blue);
+            font-family: 'Orbitron', sans-serif;
+            margin-bottom: 15px;
+        }
+        
+        .modal-card p {
+            font-size: 0.95rem;
+            color: rgba(232, 244, 248, 0.8);
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .quiz-opt {
+            padding: 12px;
+            background: rgba(10, 14, 23, 0.6);
+            border: 1px solid rgba(0, 217, 255, 0.3);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .quiz-opt:hover {
+            background: rgba(0, 217, 255, 0.1);
+        }
     </style>
 </head>
 
@@ -229,9 +400,9 @@
             <p>Employee Portal</p>
         </div>
         <nav class="menu">
-            <button class="active">Overview</button>
-            <button>Training Lab</button>
-            <button>Simulations</button>
+            <button id="btnOverview" class="active" onclick="switchTab('overview')">Overview</button>
+            <button id="btnTraining" onclick="switchTab('training')">Training Lab</button>
+            <button id="btnSimulations" onclick="switchTab('simulations')">Simulations</button>
             <button class="logout" onclick="logout()">Logout</button>
         </nav>
     </aside>
@@ -242,43 +413,64 @@
             <p>Here is your current security standing and training requirements.</p>
         </div>
 
-        <div class="dashboard-grid">
-            <div class="panel">
-                <h3>Personal Risk Profile</h3>
-                <div class="score-circle">
-                    <h1 id="riskScoreDisplay">--</h1>
-                    <p>Risk Score</p>
+        <div id="tab-overview" class="tab-content active">
+            <div class="dashboard-grid">
+                <div class="panel">
+                    <h3>Personal Risk Profile</h3>
+                    <div class="score-circle">
+                        <h1 id="riskScoreDisplay">--</h1>
+                        <p>Risk Score</p>
+                    </div>
+                    <p style="text-align: center; color: rgba(232, 244, 248, 0.7); font-size: 0.9rem;">Maintain a score below 30 to stay in the green zone. High scores require mandatory retraining.</p>
                 </div>
-                <p style="text-align: center; color: rgba(232, 244, 248, 0.7); font-size: 0.9rem;">Maintain a score below 30 to stay in the green zone. High scores require mandatory retraining.</p>
-            </div>
 
-            <div class="panel">
-                <h3 style="color: var(--cyber-purple);">Assigned Training</h3>
-                <ul class="training-list">
-                    <li class="training-item">
-                        <div>
-                            <strong>Email Scrutiny Basics</strong>
-                            <p style="font-size: 0.8rem; color: #888; margin-top: 4px;">Due in 3 days</p>
-                        </div>
-                        <button class="btn-start" onclick="window.location.href='free-trial.html'">Start</button>
-                    </li>
-                    <li class="training-item">
-                        <div>
-                            <strong>Spotting Fake Invoices</strong>
-                            <p style="font-size: 0.8rem; color: #888; margin-top: 4px;">Completed</p>
-                        </div>
-                        <span style="color: var(--cyber-green); font-size: 0.9rem;">✓ Pass</span>
-                    </li>
-                </ul>
+                <div class="panel">
+                    <h3 style="color: var(--cyber-purple);">Assigned Training</h3>
+                    <ul class="training-list" id="assignedTrainingList">
+                        <p style="font-size: 0.8rem; color: #888; padding: 10px;">Loading assignments...</p>
+                    </ul>
+                </div>
             </div>
         </div>
+
+        <div id="tab-training" class="tab-content">
+             <div class="panel">
+                 <h3>Training Lab</h3>
+                 <p style="color: rgba(232, 244, 248, 0.7);">Complete interactive modules to lower your risk score.</p>
+                 <div class="training-grid" id="trainingLabGrid">
+                     <p style="color: rgba(232, 244, 248, 0.7); padding: 10px;">Loading modules...</p>
+                 </div>
+             </div>
+        </div>
+
+        <div id="tab-simulations" class="tab-content">
+             <div class="panel">
+                 <h3>Simulations Inbox</h3>
+                 <p style="color: rgba(232, 244, 248, 0.7);">Recent communications. Report suspicious emails to reduce your risk score.</p>
+                 <div id="inboxList" class="inbox-list">
+                     <p style="text-align: center; color: rgba(232, 244, 248, 0.5); padding: 20px;">Fetching simulated emails...</p>
+                 </div>
+             </div>
+        </div>
     </main>
+
+    <!-- Quiz Modal -->
+    <div class="modal-overlay" id="quizModal">
+        <div class="modal-card">
+            <h2 id="quizTitle">Training Module</h2>
+            <p id="quizQuestion">Loading scenario...</p>
+            <div class="quiz-options" id="quizOptions">
+            </div>
+            <button class="btn-action" onclick="closeQuiz()" style="background: rgba(255,0,85,0.1); color: var(--cyber-red); border: 1px solid var(--cyber-red); margin-top: 15px;">Cancel Training</button>
+        </div>
+    </div>
 
     <script>
         // Load user data to prevent lockouts and setup profile
         const localUser = JSON.parse(localStorage.getItem("user"));
+        const token = localStorage.getItem("phishguard_token");
         
-        if (localUser) {
+        if (localUser && token) {
             document.getElementById("employeeName").innerText = `Welcome, ${localUser.name}`;
             
             const updateDashboard = (score) => {
@@ -314,38 +506,246 @@
             // Function to fetch live details
             const fetchLiveDetails = async () => {
                 try {
-                    const res = await fetch(`http://localhost:5000/employee/${localUser.email}`);
+                    const res = await fetch(`http://localhost:5000/employee/${localUser.email}`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
                     if (!res.ok) throw new Error("Failed to fetch live details");
                     
                     const user = await res.json();
-                    if (!user) return; // fallback to local user data if failed
+                    if (!user) return; 
                     
                     document.getElementById("employeeName").innerText = `Welcome, ${user.name}`;
                     
-                    let newScore = user.riskScore ? user.riskScore : currentScore;
+                    let newScore = user.riskScore !== undefined ? user.riskScore : currentScore;
                     updateDashboard(newScore);
                     
-                    // Update the local storage user object to keep it up to date
                     localUser.riskScore = newScore;
                     localUser.name = user.name;
                     localStorage.setItem("user", JSON.stringify(localUser));
+
+                    // Render dynamic lists based on deep User schema
+                    if (user.trainings) {
+                        renderAssignedTrainings(user.trainings);
+                        renderTrainingLab(user.trainings);
+                    }
 
                 } catch (err) {
                     console.error("Error fetching live details:", err);
                 }
             };
             
-            // Fetch immediately, then setup interval to poll for changes
             fetchLiveDetails();
             setInterval(fetchLiveDetails, 5000);
 
+            // Fetch Inbox Data
+            fetchInbox();
+
         } else {
-            // Failsafe if accessed directly without login
             window.location.href = "login.html";
+        }
+
+        /* --- UI LOGIC --- */
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.getElementById('tab-' + tabName).classList.add('active');
+
+            document.querySelectorAll('.menu button').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('btn' + tabName.charAt(0).toUpperCase() + tabName.slice(1)).classList.add('active');
+        }
+
+        function renderAssignedTrainings(trainings) {
+            const list = document.getElementById('assignedTrainingList');
+            list.innerHTML = '';
+            
+            if (!trainings || trainings.length === 0) {
+                list.innerHTML = '<li class="training-item"><p style="color:#888;">No training assigned.</p></li>';
+                return;
+            }
+
+            trainings.forEach(t => {
+                const item = document.createElement('li');
+                item.className = 'training-item';
+                
+                let actionHtml = '';
+                if (t.status === 'completed') {
+                    actionHtml = `<span style="color: var(--cyber-green); font-size: 0.9rem;">✓ Pass (${t.score}%)</span>`;
+                } else {
+                    actionHtml = `<button class="btn-start" onclick="switchTab('training')">Start</button>`;
+                }
+
+                item.innerHTML = `
+                    <div>
+                        <strong>${t.name}</strong>
+                        <p style="font-size: 0.8rem; color: #888; margin-top: 4px;">${t.status === 'completed' ? 'Completed' : 'Due in ' + t.dueDate}</p>
+                    </div>
+                    ${actionHtml}
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        function renderTrainingLab(trainings) {
+            const grid = document.getElementById('trainingLabGrid');
+            grid.innerHTML = '';
+            
+            if (!trainings || trainings.length === 0) {
+                grid.innerHTML = '<p>No training modules found.</p>';
+                return;
+            }
+
+            trainings.forEach(t => {
+                const card = document.createElement('div');
+                card.className = 'training-card';
+                card.innerHTML = `
+                    <h4>${t.name}</h4>
+                    <p><strong>Difficulty:</strong> ${(t.difficulty ? t.difficulty : 'standard').charAt(0).toUpperCase() + (t.difficulty ? t.difficulty : 'standard').slice(1)} | <strong>Type:</strong> ${(t.type ? t.type : 'module').toUpperCase()}</p>
+                    <p style="font-size: 0.8rem; color: #888; margin-bottom: 15px;">Duration: ${t.duration || '10 min'} ${t.isMandatory ? '| <span style="color:var(--cyber-orange)">Mandatory</span>' : ''}</p>
+                    ${t.status === 'completed' 
+                        ? `<div style="text-align:center; padding: 10px; color: var(--cyber-green); border: 1px solid var(--cyber-green); border-radius: 8px;">Completed (Score: ${t.score}%)</div>`
+                        : `<button class="btn-action" onclick="openQuiz('${t.id}', '${t.name}')">Start ${t.type === 'simulation' ? 'Simulation' : 'Module'}</button>`
+                    }
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        /* --- API INTEGRATIONS --- */
+        async function fetchInbox() {
+            try {
+                const res = await fetch("http://localhost:5000/campaigns", {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const campaigns = await res.json();
+                const inboxList = document.getElementById('inboxList');
+                inboxList.innerHTML = '';
+                
+                const targetCamps = campaigns.filter(c => c.department === "All" || c.department === localUser.department);
+                if (targetCamps.length === 0) {
+                    inboxList.innerHTML = '<p style="text-align: center; color: rgba(232, 244, 248, 0.5); padding: 20px;">No new emails in your inbox.</p>';
+                    return;
+                }
+
+                targetCamps.forEach(camp => {
+                    const el = document.createElement('div');
+                    el.className = 'email-item';
+                    el.innerHTML = `
+                        <div class="email-content">
+                            <h4>${camp.template}</h4>
+                            <p>From: security-alert@internal.system | Subject: ${camp.campaignName}</p>
+                        </div>
+                        <div class="email-actions">
+                            <button class="btn-report" onclick="logSimulation(true, this)">Report</button>
+                            <button class="btn-click" onclick="logSimulation(false, this)">Read/Click</button>
+                        </div>
+                    `;
+                    inboxList.appendChild(el);
+                });
+            } catch (err) {
+                console.error("Error fetching inbox:", err);
+            }
+        }
+
+        async function logSimulation(reported, btnElement) {
+            try {
+                const res = await fetch(`http://localhost:5000/employee/${localUser.email}/simulation`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ reported })
+                });
+                const data = await res.json();
+                
+                if (reported) {
+                    alert("Correct! You correctly reported a phishing attempt. 🛡️ Risk Score Updated!");
+                    const item = btnElement.closest('.email-item');
+                    item.classList.add('safe');
+                    item.querySelector('.email-actions').innerHTML = '<span style="color:var(--cyber-green);">Reported Safe</span>';
+                } else {
+                    alert("Warning! You clicked a suspicious link. You fell for phishing. ❌ Risk Score Penalized!");
+                    const item = btnElement.closest('.email-item');
+                    item.classList.add('risk');
+                    item.querySelector('.email-actions').innerHTML = '<span style="color:var(--cyber-red);">Bait Clicked</span>';
+                }
+
+                if (data.newScore !== undefined) {
+                    document.getElementById("riskScoreDisplay").innerText = data.newScore;
+                    const circle = document.getElementById("riskScoreDisplay").parentElement;
+                    circle.style.boxShadow = reported ? "0 0 40px var(--cyber-green)" : "0 0 40px var(--cyber-red)";
+                }
+            } catch (err) {
+                console.error("Simulation log failed", err);
+            }
+        }
+
+        /* --- TRAINING LAB --- */
+        let currentActiveModule = '';
+
+        function openQuiz(moduleId, moduleName) {
+            currentActiveModule = moduleId;
+            const modal = document.getElementById('quizModal');
+            
+            document.getElementById('quizTitle').innerText = moduleName;
+            document.getElementById('quizQuestion').innerText = 'Based on the rigorous learning materials just presented to you, how would you score your understanding of this interactive module?';
+            
+            const optionsContainer = document.getElementById('quizOptions');
+            optionsContainer.innerHTML = '';
+            
+            // Generate mock performance score choices
+            const choices = [
+                { text: 'Complete Mastery (Score: 100)', score: 100 },
+                { text: 'Strong Understanding (Score: 75)', score: 75 },
+                { text: 'Needs Improvement (Score: 40)', score: 40 },
+                { text: 'Failed Module (Score: 0)', score: 0 }
+            ];
+
+            choices.forEach(opt => {
+                const btn = document.createElement('div');
+                btn.className = 'quiz-opt';
+                btn.innerText = opt.text;
+                btn.onclick = () => submitTraining(opt.score);
+                optionsContainer.appendChild(btn);
+            });
+
+            modal.style.display = 'flex';
+        }
+
+        function closeQuiz() {
+            document.getElementById('quizModal').style.display = 'none';
+        }
+
+        async function submitTraining(performanceScore) {
+            closeQuiz();
+            try {
+                const res = await fetch(`http://localhost:5000/employee/${localUser.email}/complete-training`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ moduleId: currentActiveModule, performanceScore })
+                });
+                
+                const data = await res.json();
+                
+                if (data.newScore !== undefined) {
+                    alert(`Training Logged ✅! Performance Score: ${performanceScore}%. Native Risk Reduced by: ${data.riskReduction} points.`);
+                    document.getElementById("riskScoreDisplay").innerText = data.newScore;
+                    const circle = document.getElementById("riskScoreDisplay").parentElement;
+                    circle.style.boxShadow = "0 0 40px var(--cyber-green)";
+                    switchTab('overview');
+                } else {
+                    alert("Error saving training.");
+                }
+            } catch (err) {
+                console.error("Failed to execute training completion", err);
+            }
         }
 
         function logout() {
             localStorage.removeItem("user");
+            localStorage.removeItem("phishguard_token");
             window.location.href = "login.html";
         }
     </script>

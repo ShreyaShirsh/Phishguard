@@ -449,9 +449,16 @@
                 const data = await res.json();
 
                 if (data.message.includes("Successful")) {
+                    
+                    if (data.user.role !== selectedRole) {
+                        document.getElementById('errorMessage').innerHTML = "Cannot login: Role mismatch ❌";
+                        showError();
+                        return;
+                    }
 
-                    // store user data
+                    // store user data and token
                     localStorage.setItem("user", JSON.stringify(data.user));
+                    localStorage.setItem("phishguard_token", data.token);
 
                     // role-based redirect
                     if (data.user.role === "admin") {
@@ -461,12 +468,14 @@
                     }
 
                 } else {
+                    document.getElementById('errorMessage').innerHTML = "Invalid credentials. Please try again.";
                     showError();
                 }
 
             } catch (error) {
                 console.error(error);
-                alert("Server error ❌");
+                document.getElementById('errorMessage').innerHTML = "Server error ❌";
+                showError();
             }
         }
 
@@ -483,8 +492,9 @@
 
         window.onload = function () {
             var user = localStorage.getItem('user');
+            var token = localStorage.getItem('phishguard_token');
 
-            if (user) {
+            if (user && token) {
                 user = JSON.parse(user);
 
                 if (user.role === 'admin') {

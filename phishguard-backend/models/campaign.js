@@ -5,6 +5,9 @@ const campaignSchema = new mongoose.Schema({
     template: String,
     department: String,
     createdBy: String,
+    targetedEmployees: { type: Number, default: 0 },
+    opened: { type: Number, default: 0 },
+    clicked: { type: Number, default: 0 },
     createdAt: {
         type: Date,
         default: Date.now

@@ -155,9 +155,17 @@
     </div>
 
     <script>
+        const user = JSON.parse(localStorage.getItem("user"));
+        const token = localStorage.getItem("phishguard_token");
+        if (!user || user.role !== "admin" || !token) {
+            window.location.href = "login.html";
+        }
+        
         async function fetchEmployees() {
             try {
-                const res = await fetch("http://localhost:5000/employees");
+                const res = await fetch("http://localhost:5000/employees", {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
                 const employees = await res.json();
                 
                 const tbody = document.getElementById("employeeTableBody");
@@ -169,7 +177,7 @@
                 }
 
                 employees.forEach(emp => {
-                    const score = emp.riskScore > 0 ? emp.riskScore : Math.floor(Math.random() * 85);
+                    const score = emp.riskScore;
                     
                     let scoreClass = "low";
                     if (score > 60) scoreClass = "high";
@@ -191,6 +199,7 @@
         }
         
         fetchEmployees();
+        setInterval(fetchEmployees, 5000);
     </script>
 </body>
 </html>
