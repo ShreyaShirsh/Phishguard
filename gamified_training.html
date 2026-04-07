@@ -526,9 +526,10 @@
             
             if (currentSimIndex >= currentSimQuestions.length) {
                 let percent = (currentSimScore / currentSimQuestions.length) * 100;
-                let earnedXp = 20;
+                let earnedXp = 0;
                 if (percent >= 80) earnedXp = 100;
                 else if (percent >= 50) earnedXp = 50;
+                else if (percent > 0) earnedXp = 20;
 
                 container.innerHTML = `
                 <div style="background:#111; padding:30px; border-radius:10px; text-align: center;">
@@ -624,9 +625,10 @@
             const container = document.getElementById("modulesContainer");
             if (currentQuizIndex >= currentQuizQuestions.length) {
                 let percent = (currentQuizScore / currentQuizQuestions.length) * 100;
-                let earnedXp = 10;
+                let earnedXp = 0;
                 if (percent >= 80) earnedXp = 50;
                 else if (percent >= 50) earnedXp = 30;
+                else if (percent > 0) earnedXp = 10;
 
                 container.innerHTML = `
                 <div style="background:#111; padding:30px; border-radius:10px; text-align: center;">

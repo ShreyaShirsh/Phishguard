@@ -199,8 +199,32 @@ app.get("/api/simulation/:category", verifyToken, async (req, res) => {
 app.delete("/campaign/:id", verifyToken, async (req, res) => {
     try {
         if (req.user.role !== "admin") return res.status(403).json({ error: "Access Denied: Admin Only ❌" });
-        await Campaign.findByIdAndDelete(req.params.id);
-        res.json({ message: "Campaign Deleted Successfully ✅" });
+        
+        const campaign = await Campaign.findById(req.params.id);
+        if (campaign) {
+            // Reverse targeting: Lock modules for targeted users
+            const query = { role: "employee" };
+            if (campaign.department !== "All" && campaign.department) query.department = campaign.department;
+            
+            const categoryMapping = {
+                "Email Scrutiny Phishing": "email_phishing",
+                "Financial Phishing": "financial",
+                "Social Frauds": "social_media"
+            };
+            const activeModId = categoryMapping[campaign.template] || campaign.template;
+            
+            if (activeModId) {
+                await User.updateMany(
+                    query,
+                    { $set: { "modules.$[elem].enabled": false } },
+                    { arrayFilters: [{ "elem.moduleId": activeModId }] }
+                );
+            }
+            
+            await Campaign.findByIdAndDelete(req.params.id);
+            return res.json({ message: "Campaign Terminated and Modules Locked ✅" });
+        }
+        res.status(404).json({ error: "Campaign not found" });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
