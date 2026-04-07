@@ -1,0 +1,21 @@
+{
+  "title": "Email Security",
+  "category": "email",
+  "tasks": [
+    {
+      "type": "simulation",
+      "xp": 100,
+      "completed": false
+    },
+    {
+      "type": "quiz",
+      "xp": 50,
+      "completed": false
+    },
+    {
+      "type": "video",
+      "xp": 30,
+      "completed": false
+    }
+  ]
+}

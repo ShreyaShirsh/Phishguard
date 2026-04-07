@@ -1,1072 +1,655 @@
-<style>
-    * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-    }
+<!DOCTYPE html>
+<html lang="en">
 
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Portal - PhishGuard</title>
+    <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Red+Hat+Display:wght@400;500;700&display=swap');
 
-    :root {
-        --pg-bg: #0a0e17;
-        --pg-surface: rgba(26, 31, 46, 0.82);
-        --pg-border: rgba(0, 217, 255, 0.2);
-        --pg-cyan: #00d9ff;
-        --pg-cyan-dim: #0088aa;
-        --pg-text: #e8f4f8;
-        --pg-muted: rgba(232, 244, 248, 0.7);
-        --pg-red: #ff0055;
-        --pg-green: #00ff88;
-        --pg-amber: #ffd54f;
-        --pg-purple: #9945ff;
-        --pg-blue: #00d9ff;
-    }
-
-    .wrap {
-        background: linear-gradient(120deg, #0a0e17 0%, #141a29 100%);
-        min-height: 100vh;
-        display: flex;
-        font-family: 'Red Hat Display', sans-serif;
-        color: var(--pg-text);
-        position: relative;
-    }
-    
-    .wrap:before {
-        content: '';
-        position: fixed;
-        inset: 0;
-        background-image: linear-gradient(rgba(0, 217, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 217, 255, 0.03) 1px, transparent 1px);
-        background-size: 40px 40px;
-        pointer-events: none;
-        z-index: 0;
-    }
-
-    .sidebar {
-        width: 220px;
-        background: var(--pg-surface);
-        border-right: 1px solid var(--pg-border);
-        display: flex;
-        flex-direction: column;
-        flex-shrink: 0;
-    }
-
-    .logo {
-        padding: 20px 16px 12px;
-        border-bottom: 1px solid var(--pg-border);
-    }
-
-    .logo-title {
-        font-size: 15px;
-        font-weight: 500;
-        color: var(--pg-cyan);
-        letter-spacing: 1px;
-    }
-
-    .logo-sub {
-        font-size: 11px;
-        color: var(--pg-muted);
-        margin-top: 2px;
-    }
-
-    .nav {
-        padding: 8px;
-        flex: 1;
-    }
-
-    .nav-item {
-        padding: 9px 12px;
-        border-radius: 6px;
-        font-size: 13px;
-        color: var(--pg-muted);
-        cursor: pointer;
-        margin-bottom: 2px;
-    }
-
-    .nav-item.active {
-        background: rgba(0, 229, 200, 0.1);
-        color: var(--pg-cyan);
-        border: 1px solid rgba(0, 229, 200, 0.2);
-    }
-
-    .nav-item:hover:not(.active) {
-        background: rgba(255, 255, 255, 0.05);
-        color: var(--pg-text);
-    }
-
-    .nav-logout {
-        color: var(--pg-red);
-        border: 1px solid rgba(248, 81, 73, 0.3);
-    }
-
-    .nav-logout:hover {
-        background: rgba(248, 81, 73, 0.1);
-        color: var(--pg-red);
-    }
-
-    .xp-bar-wrap {
-        padding: 12px;
-        border-top: 1px solid var(--pg-border);
-    }
-
-    .xp-label {
-        font-size: 11px;
-        color: var(--pg-muted);
-        margin-bottom: 5px;
-        display: flex;
-        justify-content: space-between;
-    }
-
-    .xp-track {
-        background: var(--pg-border);
-        border-radius: 99px;
-        height: 5px;
-        overflow: hidden;
-    }
-
-    .xp-fill {
-        height: 100%;
-        background: var(--pg-cyan);
-        border-radius: 99px;
-        transition: width 0.6s ease;
-    }
-
-    .xp-rank {
-        font-size: 11px;
-        color: var(--pg-cyan);
-        margin-top: 5px;
-    }
-
-    .main {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-        min-width: 0;
-    }
-
-    .topbar {
-        padding: 18px 24px 14px;
-        border-bottom: 1px solid var(--pg-border);
-    }
-
-    .topbar h1 {
-        font-size: 22px;
-        font-weight: 700;
-        font-family: 'Orbitron', sans-serif;
-        color: var(--pg-cyan);
-    }
-
-    .topbar p {
-        font-size: 13px;
-        color: var(--pg-muted);
-        margin-top: 4px;
-    }
-
-    .stats-row {
-        display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 12px;
-        padding: 16px 24px;
-        border-bottom: 1px solid var(--pg-border);
-    }
-
-    .stat-card {
-        background: var(--pg-surface);
-        border: 1px solid var(--pg-border);
-        border-radius: 8px;
-        padding: 12px 14px;
-    }
-
-    .stat-label {
-        font-size: 11px;
-        color: var(--pg-muted);
-        margin-bottom: 4px;
-    }
-
-    .stat-val {
-        font-size: 20px;
-        font-weight: 500;
-        color: var(--pg-text);
-    }
-
-    .stat-val.cyan {
-        color: var(--pg-cyan);
-    }
-
-    .stat-val.green {
-        color: var(--pg-green);
-    }
-
-    .stat-val.red {
-        color: var(--pg-red);
-    }
-
-    .stat-val.amber {
-        color: var(--pg-amber);
-    }
-
-    .content {
-        flex: 1;
-        overflow-y: auto;
-        padding: 20px 24px;
-    }
-
-    .section-title {
-        font-size: 13px;
-        font-weight: 500;
-        color: var(--pg-muted);
-        text-transform: uppercase;
-        letter-spacing: 0.6px;
-        margin-bottom: 12px;
-    }
-
-    .modules-grid {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 14px;
-        margin-bottom: 24px;
-    }
-
-    .module-card {
-        background: var(--pg-surface);
-        border: 1px solid var(--pg-border);
-        border-radius: 10px;
-        padding: 16px;
-        cursor: pointer;
-        transition: border-color 0.2s;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .module-card:hover {
-        border-color: var(--pg-cyan);
-    }
-
-    .module-card.locked {
-        opacity: 0.5;
-        cursor: not-allowed;
-    }
-
-    .module-card.completed {
-        border-color: var(--pg-green);
-    }
-
-    .module-top {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        margin-bottom: 10px;
-    }
-
-    .module-icon {
-        width: 36px;
-        height: 36px;
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 16px;
-        flex-shrink: 0;
-    }
-
-    .icon-red {
-        background: rgba(248, 81, 73, 0.15);
-    }
-
-    .icon-amber {
-        background: rgba(210, 153, 34, 0.15);
-    }
-
-    .icon-blue {
-        background: rgba(56, 139, 253, 0.15);
-    }
-
-    .icon-purple {
-        background: rgba(124, 58, 237, 0.15);
-    }
-
-    .icon-cyan {
-        background: rgba(0, 229, 200, 0.15);
-    }
-
-    .icon-green {
-        background: rgba(63, 185, 80, 0.15);
-    }
-
-    .module-badges {
-        display: flex;
-        gap: 5px;
-        flex-wrap: wrap;
-        justify-content: flex-end;
-    }
-
-    .badge {
-        font-size: 10px;
-        padding: 2px 7px;
-        border-radius: 99px;
-        font-weight: 500;
-    }
-
-    .badge-red {
-        background: rgba(248, 81, 73, 0.15);
-        color: #f85149;
-    }
-
-    .badge-green {
-        background: rgba(63, 185, 80, 0.15);
-        color: #3fb950;
-    }
-
-    .badge-amber {
-        background: rgba(210, 153, 34, 0.15);
-        color: #d29922;
-    }
-
-    .badge-blue {
-        background: rgba(56, 139, 253, 0.15);
-        color: #388bfd;
-    }
-
-    .badge-gray {
-        background: rgba(125, 133, 144, 0.15);
-        color: #7d8590;
-    }
-
-    .module-name {
-        font-size: 14px;
-        font-weight: 500;
-        color: var(--pg-text);
-        margin-bottom: 4px;
-    }
-
-    .module-desc {
-        font-size: 12px;
-        color: var(--pg-muted);
-        line-height: 1.5;
-        margin-bottom: 10px;
-    }
-
-    .module-footer {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
-
-    .module-xp {
-        font-size: 11px;
-        color: var(--pg-cyan);
-    }
-
-    .module-progress {
-        font-size: 11px;
-        color: var(--pg-muted);
-    }
-
-    .mini-bar {
-        height: 3px;
-        background: var(--pg-border);
-        border-radius: 99px;
-        margin-top: 8px;
-        overflow: hidden;
-    }
-
-    .mini-fill {
-        height: 100%;
-        border-radius: 99px;
-    }
-
-    .fill-green {
-        background: var(--pg-green);
-    }
-
-    .fill-amber {
-        background: var(--pg-amber);
-    }
-
-    .fill-cyan {
-        background: var(--pg-cyan);
-    }
-
-    .challenge-section {
-        margin-bottom: 24px;
-    }
-
-    .challenge-card {
-        background: var(--pg-surface);
-        border: 1px solid var(--pg-border);
-        border-radius: 10px;
-        overflow: hidden;
-    }
-
-    .challenge-header {
-        padding: 14px 16px;
-        border-bottom: 1px solid var(--pg-border);
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .challenge-tag {
-        font-size: 10px;
-        padding: 2px 8px;
-        border-radius: 99px;
-        font-weight: 500;
-    }
-
-    .tag-live {
-        background: rgba(248, 81, 73, 0.2);
-        color: #f85149;
-    }
-
-    .tag-daily {
-        background: rgba(0, 229, 200, 0.15);
-        color: #00e5c8;
-    }
-
-    .challenge-title {
-        font-size: 14px;
-        font-weight: 500;
-        color: var(--pg-text);
-        flex: 1;
-    }
-
-    .challenge-reward {
-        font-size: 12px;
-        color: var(--pg-cyan);
-    }
-
-    .challenge-body {
-        padding: 14px 16px;
-    }
-
-    .url-game {
-        background: #0d1117;
-        border: 1px solid var(--pg-border);
-        border-radius: 8px;
-        padding: 12px 14px;
-        font-family: var(--font-mono);
-        font-size: 13px;
-        color: var(--pg-text);
-        margin-bottom: 12px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        flex-wrap: wrap;
-    }
-
-    .url-safe {
-        color: var(--pg-green);
-    }
-
-    .url-danger {
-        color: var(--pg-red);
-    }
-
-    .url-choice-row {
-        display: flex;
-        gap: 10px;
-    }
-
-    .url-btn {
-        flex: 1;
-        padding: 8px;
-        border-radius: 6px;
-        font-size: 13px;
-        font-weight: 500;
-        cursor: pointer;
-        border: 1px solid var(--pg-border);
-        background: transparent;
-        color: var(--pg-text);
-        text-align: center;
-    }
-
-    .url-btn:hover {
-        background: rgba(255, 255, 255, 0.05);
-    }
-
-    .url-btn.correct {
-        background: rgba(63, 185, 80, 0.15);
-        border-color: var(--pg-green);
-        color: var(--pg-green);
-    }
-
-    .url-btn.wrong {
-        background: rgba(248, 81, 73, 0.15);
-        border-color: var(--pg-red);
-        color: var(--pg-red);
-    }
-
-    .leaderboard {}
-
-    .lb-row {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 9px 0;
-        border-bottom: 1px solid var(--pg-border);
-        font-size: 13px;
-    }
-
-    .lb-row:last-child {
-        border-bottom: none;
-    }
-
-    .lb-rank {
-        width: 24px;
-        text-align: center;
-        color: var(--pg-muted);
-        font-size: 12px;
-    }
-
-    .lb-rank.gold {
-        color: #d29922;
-        font-weight: 500;
-    }
-
-    .lb-rank.silver {
-        color: #7d8590;
-        font-weight: 500;
-    }
-
-    .lb-rank.bronze {
-        color: #993c1d;
-        font-weight: 500;
-    }
-
-    .lb-avatar {
-        width: 28px;
-        height: 28px;
-        border-radius: 50%;
-        background: rgba(0, 229, 200, 0.15);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 10px;
-        font-weight: 500;
-        color: var(--pg-cyan);
-        flex-shrink: 0;
-    }
-
-    .lb-name {
-        flex: 1;
-        color: var(--pg-text);
-    }
-
-    .lb-name.you {
-        color: var(--pg-cyan);
-    }
-
-    .lb-score {
-        color: var(--pg-cyan);
-        font-weight: 500;
-    }
-
-    .lb-streak {
-        font-size: 11px;
-        color: var(--pg-amber);
-    }
-
-    .two-col {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 14px;
-    }
-</style>
-
-<div class="wrap">
-    <div class="sidebar">
-        <div class="logo">
-            <div class="logo-title">PHISHGUARD</div>
-            <div class="logo-sub">EMPLOYEE PORTAL</div>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --cyber-black: #0a0e17;
+            --cyber-panel: #1a1f2e;
+            --cyber-blue: #00d9ff;
+            --cyber-red: #ff0055;
+            --cyber-purple: #9945ff;
+            --cyber-green: #00ff88;
+            --cyber-white: #e8f4f8;
+        }
+
+        body {
+            font-family: 'Red Hat Display', sans-serif;
+            background: linear-gradient(120deg, #0a0e17 0%, #141a29 100%);
+            color: var(--cyber-white);
+            min-height: 100vh;
+            display: flex;
+        }
+
+        body:before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: linear-gradient(rgba(0, 217, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 217, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: move 20s linear infinite;
+            z-index: 0;
+        }
+
+        @keyframes move {
+            0% {
+                transform: translateY(0);
+            }
+
+            100% {
+                transform: translateY(50px);
+            }
+        }
+
+        .sidebar {
+            width: 260px;
+            background: rgba(10, 14, 23, 0.92);
+            border-right: 1px solid rgba(0, 217, 255, 0.2);
+            padding: 28px 16px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .brand {
+            margin-bottom: 30px;
+            padding: 0 10px;
+        }
+
+        .brand h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            background: linear-gradient(135deg, var(--cyber-blue), var(--cyber-green));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .brand p {
+            margin-top: 6px;
+            font-size: 0.8rem;
+            color: rgba(232, 244, 248, 0.7);
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+        }
+
+        .menu {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .menu button {
+            border: 1px solid rgba(0, 217, 255, 0.2);
+            background: rgba(26, 31, 46, 0.7);
+            color: var(--cyber-white);
+            padding: 13px 14px;
+            border-radius: 10px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.83rem;
+            letter-spacing: 0.06em;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.25s;
+        }
+
+        .menu button:hover,
+        .menu button.active {
+            border-color: var(--cyber-blue);
+            transform: translateX(4px);
+            box-shadow: 0 0 20px rgba(0, 217, 255, 0.2);
+        }
+
+        .menu button.logout {
+            margin-top: 20px;
+            border-color: rgba(255, 0, 85, 0.4);
+            color: #ffdce8;
+        }
+
+        .menu button.logout:hover {
+            border-color: var(--cyber-red);
+            box-shadow: 0 0 20px rgba(255, 0, 85, 0.25);
+        }
+
+        .main {
+            flex: 1;
+            padding: 40px;
+            position: relative;
+            z-index: 2;
+            overflow-y: auto;
+            height: 100vh;
+        }
+
+        .header {
+            text-align: left;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-family: 'Orbitron';
+            font-size: 3rem;
+            background: linear-gradient(135deg, var(--cyber-blue), var(--cyber-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            color: rgba(232, 244, 248, 0.7);
+            font-size: 1.1rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: rgba(26, 31, 46, 0.6);
+            border: 2px solid rgba(0, 217, 255, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            transition: 0.3s;
+            text-align: center;
+        }
+
+        .stat-card:hover {
+            border-color: var(--cyber-blue);
+            box-shadow: 0 0 20px rgba(0, 217, 255, 0.4);
+            transform: translateY(-5px);
+        }
+
+        .stat {
+            font-size: 2rem;
+            font-family: 'Orbitron';
+            color: var(--cyber-blue);
+        }
+
+        .modules-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .module-item {
+            background: rgba(26, 31, 46, 0.8);
+            border: 1px solid rgba(0, 217, 255, 0.2);
+            border-radius: 12px;
+            transition: 0.3s;
+            padding: 24px;
+        }
+
+        .module-item:hover {
+            border-color: var(--cyber-blue);
+            box-shadow: 0 0 15px rgba(0, 217, 255, 0.1);
+        }
+
+        .module-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .module-header h3 {
+            font-family: 'Orbitron';
+            color: var(--cyber-green);
+            font-size: 1.4rem;
+        }
+
+        .module-status {
+            font-family: 'Orbitron';
+            color: #ccc;
+            font-size: 0.9rem;
+        }
+
+        .tasks-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .task-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(10, 14, 23, 0.6);
+            padding: 14px 20px;
+            border-radius: 8px;
+            border-left: 4px solid var(--cyber-blue);
+        }
+
+        .task-row.completed {
+            border-left-color: var(--cyber-green);
+            opacity: 0.8;
+        }
+
+        .task-name {
+            font-weight: bold;
+            color: var(--cyber-white);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .task-xp {
+            color: var(--cyber-blue);
+            font-family: 'Orbitron';
+            font-size: 0.85rem;
+        }
+
+        .btn-start {
+            background: transparent;
+            border: 1px solid var(--cyber-blue);
+            color: var(--cyber-blue);
+            padding: 8px 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Orbitron';
+            transition: 0.3s;
+        }
+
+        .btn-start:hover {
+            background: var(--cyber-blue);
+            color: var(--cyber-black);
+            box-shadow: 0 0 10px var(--cyber-blue);
+        }
+
+        .btn-start:disabled {
+            background: transparent;
+            border-color: gray;
+            color: gray;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .btn-start.completed-btn {
+            border-color: var(--cyber-green);
+            color: var(--cyber-green);
+        }
+    </style>
+</head>
+
+<body>
+
+    <aside class="sidebar">
+        <div class="brand">
+            <h1>PHISHGUARD</h1>
+            <p>Employee Portal</p>
         </div>
-        <div class="nav">
-            <div class="nav-item" onclick="window.location.href='employee-dashboard.html'">Overview</div>
-            <div class="nav-item active">Training Lab</div>
-            <div class="nav-item" onclick="window.location.href='employee-dashboard.html'">Simulations</div>
-            <div style="margin-top: 12px;">
-                <div class="nav-item nav-logout">Logout</div>
-            </div>
-        </div>
-        <div class="xp-bar-wrap">
-            <div class="xp-label"><span>XP Progress</span><span id="xpNum">1,240 / 2,000</span></div>
-            <div class="xp-track">
-                <div class="xp-fill" id="xpFill" style="width: 62%;"></div>
-            </div>
-            <div class="xp-rank">Rank: Threat Hunter II</div>
-        </div>
-    </div>
+        <nav class="menu">
+            <button onclick="window.location.href='employee-dashboard.html'">Overview</button>
+            <button class="active">Training Lab</button>
+            <button onclick="window.location.href='employee-dashboard.html'">Simulations</button>
+            <button class="logout" onclick="logout()">Logout</button>
+        </nav>
+    </aside>
 
-    <div class="main">
-        <div class="topbar">
-            <h1>Training Lab</h1>
-            <p>Complete challenges to lower your risk score and climb the leaderboard.</p>
+    <main class="main">
+        <div class="header">
+            <h1>TRAINING LAB</h1>
+            <p>Complete your required modules to improve organizational security</p>
         </div>
 
-        <div class="stats-row">
+        <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-label">Risk score</div>
-                <div class="stat-val amber" id="dashRisk">--</div>
+                <div class="stat" id="uiRisk">--</div>
+                <p>Current Risk Score</p>
             </div>
             <div class="stat-card">
-                <div class="stat-label">Modules done</div>
-                <div class="stat-val cyan" id="dashMods">-- / 6</div>
+                <div class="stat" id="uiModulesDone">0/3</div>
+                <p>Modules Finished</p>
             </div>
             <div class="stat-card">
-                <div class="stat-label">XP earned</div>
-                <div class="stat-val green" id="dashXP">--</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Current streak</div>
-                <div class="stat-val" style="color: #d29922;" id="dashStreak">🔥 -- days</div>
+                <div class="stat" id="uiTotalXp">0</div>
+                <p>Total XP</p>
             </div>
         </div>
 
-        <div class="content">
-
-            <div class="section-title">Training modules</div>
-            <div class="modules-grid" id="dynamicModulesGrid">
-                <!-- Modules will be loaded here dynamically -->
-                <p style="color: var(--pg-muted); font-size: 13px;">Loading interactive modules...</p>
-            </div>
-
-                <div class="module-card completed" onclick="openModule('url')">
-                    <div class="module-top">
-                        <div class="module-icon icon-green">🔗</div>
-                        <div class="module-badges"><span class="badge badge-green">Completed</span><span
-                                class="badge badge-blue">+200 XP</span></div>
-                    </div>
-                    <div class="module-name">URL dissection lab</div>
-                    <div class="module-desc">Learn to spot fake domains, subdomain tricks, and punycode attacks by
-                        picking apart real URLs.</div>
-                    <div class="module-footer"><span class="module-xp">+200 XP earned</span><span
-                            class="module-progress">5/5 done</span></div>
-                    <div class="mini-bar">
-                        <div class="mini-fill fill-green" style="width:100%"></div>
-                    </div>
-                </div>
-
-                <div class="module-card" onclick="openModule('email')">
-                    <div class="module-top">
-                        <div class="module-icon icon-amber">📧</div>
-                        <div class="module-badges"><span class="badge badge-amber">In progress</span><span
-                                class="badge badge-blue">+300 XP</span></div>
-                    </div>
-                    <div class="module-name">Email header forensics</div>
-                    <div class="module-desc">Drag and drop suspicious header fields to identify spoofed senders, relay
-                        hops, and DKIM failures.</div>
-                    <div class="module-footer"><span class="module-xp">+300 XP on completion</span><span
-                            class="module-progress">3/6 done</span></div>
-                    <div class="mini-bar">
-                        <div class="mini-fill fill-amber" style="width:50%"></div>
-                    </div>
-                </div>
-
-                <div class="module-card" onclick="openModule('social')">
-                    <div class="module-top">
-                        <div class="module-icon icon-purple">🧠</div>
-                        <div class="module-badges"><span class="badge badge-red">Hard</span><span
-                                class="badge badge-blue">+400 XP</span></div>
-                    </div>
-                    <div class="module-name">Social engineering IQ test</div>
-                    <div class="module-desc">React to real-time voice/chat scenarios. A "colleague" asks you for
-                        credentials — what do you do?</div>
-                    <div class="module-footer"><span class="module-xp">+400 XP on completion</span><span
-                            class="module-progress">0/4 done</span></div>
-                    <div class="mini-bar">
-                        <div class="mini-fill fill-cyan" style="width:0%"></div>
-                    </div>
-                </div>
-
-                <div class="module-card" onclick="openModule('attachment')">
-                    <div class="module-top">
-                        <div class="module-icon icon-red">📎</div>
-                        <div class="module-badges"><span class="badge badge-red">Hard</span><span
-                                class="badge badge-blue">+350 XP</span></div>
-                    </div>
-                    <div class="module-name">Malicious attachment detector</div>
-                    <div class="module-desc">Spot dangerous file types disguised with double extensions, macro-enabled
-                        docs, and fake PDFs in timed rounds.</div>
-                    <div class="module-footer"><span class="module-xp">+350 XP on completion</span><span
-                            class="module-progress">0/5 done</span></div>
-                    <div class="mini-bar">
-                        <div class="mini-fill fill-cyan" style="width:0%"></div>
-                    </div>
-                </div>
-
-                <div class="module-card locked">
-                    <div class="module-top">
-                        <div class="module-icon icon-blue">🔒</div>
-                        <div class="module-badges"><span class="badge badge-gray">Locked</span><span
-                                class="badge badge-blue">+500 XP</span></div>
-                    </div>
-                    <div class="module-name">Deepfake voice challenge</div>
-                    <div class="module-desc">Listen to AI-cloned voices of your "CEO" and decide if the call is real or
-                        synthetic. Unlocks at Rank III.</div>
-                    <div class="module-footer"><span class="module-xp">Unlock at Rank III</span><span
-                            class="module-progress">0/3 done</span></div>
-                    <div class="mini-bar">
-                        <div class="mini-fill fill-cyan" style="width:0%"></div>
-                    </div>
-                </div>
-
-                <div class="module-card locked">
-                    <div class="module-top">
-                        <div class="module-icon icon-cyan">🕵️</div>
-                        <div class="module-badges"><span class="badge badge-gray">Locked</span><span
-                                class="badge badge-blue">+600 XP</span></div>
-                    </div>
-                    <div class="module-name">Full attack chain sim</div>
-                    <div class="module-desc">A 20-minute end-to-end attack — from spear phish email to fake login page
-                        to credential harvest. Stop it at every step.</div>
-                    <div class="module-footer"><span class="module-xp">Unlock at Rank IV</span><span
-                            class="module-progress">0/1 done</span></div>
-                    <div class="mini-bar">
-                        <div class="mini-fill fill-cyan" style="width:0%"></div>
-                    </div>
-                </div>
-
-            </div>
-
-            <div class="section-title">Daily challenge — URL sniper</div>
-            <div class="challenge-card" style="margin-bottom: 24px;">
-                <div class="challenge-header">
-                    <span class="challenge-tag tag-daily">Daily</span>
-                    <span class="challenge-title">Safe or phishing? Judge these URLs in under 10 seconds each.</span>
-                    <span class="challenge-reward">+50 XP</span>
-                </div>
-                <div class="challenge-body">
-                    <div style="font-size: 12px; color: var(--pg-muted); margin-bottom: 10px;">Round <span
-                            id="urlRound">1</span> of 3 — time remaining: <span id="urlTimer"
-                            style="color: var(--pg-cyan); font-weight:500;">10s</span></div>
-                    <div class="url-game" id="urlDisplay">
-                        <span class="url-safe">https://</span><span
-                            id="urlText">accounts.google.com/signin/v2/identifier</span>
-                    </div>
-                    <div class="url-choice-row">
-                        <button class="url-btn" id="btnSafe" onclick="answerUrl(true)">Safe</button>
-                        <button class="url-btn" id="btnPhish" onclick="answerUrl(false)">Phishing</button>
-                    </div>
-                    <div id="urlFeedback"
-                        style="font-size: 12px; margin-top: 10px; color: var(--pg-muted); min-height: 18px;"></div>
-                </div>
-            </div>
-
-            <div class="two-col">
-                <div>
-                    <div class="section-title">Global leaderboard</div>
-                    <div class="challenge-card">
-                        <div class="challenge-body" style="padding: 10px 14px;">
-                            <div class="leaderboard" id="dynamicLeaderboard">
-                                <span style="font-size: 12px; color: var(--pg-muted);">Loading live ranks...</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div>
-                    <div class="section-title">Badges earned</div>
-                    <div class="challenge-card">
-                        <div class="challenge-body"
-                            style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 14px;">
-                            <div style="text-align:center;">
-                                <div style="font-size: 28px; margin-bottom: 4px;">🎯</div>
-                                <div style="font-size: 11px; color: var(--pg-cyan);">First catch</div>
-                            </div>
-                            <div style="text-align:center;">
-                                <div style="font-size: 28px; margin-bottom: 4px;">🔥</div>
-                                <div style="font-size: 11px; color: var(--pg-amber);">4-day streak</div>
-                            </div>
-                            <div style="text-align:center;">
-                                <div style="font-size: 28px; margin-bottom: 4px;">🔗</div>
-                                <div style="font-size: 11px; color: var(--pg-green);">URL master</div>
-                            </div>
-                            <div style="text-align:center; opacity: 0.35;">
-                                <div style="font-size: 28px; margin-bottom: 4px;">🧠</div>
-                                <div style="font-size: 11px; color: var(--pg-muted);">Mind reader</div>
-                            </div>
-                            <div style="text-align:center; opacity: 0.35;">
-                                <div style="font-size: 28px; margin-bottom: 4px;">🏆</div>
-                                <div style="font-size: 11px; color: var(--pg-muted);">Top 3</div>
-                            </div>
-                            <div style="text-align:center; opacity: 0.35;">
-                                <div style="font-size: 28px; margin-bottom: 4px;">🕵️</div>
-                                <div style="font-size: 11px; color: var(--pg-muted);">Full chain</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
+        <h2 style="margin: 0 0 20px; font-family:Orbitron; color: var(--cyber-white);">Required Modules (3)</h2>
+        <div class="modules-grid" id="modulesContainer">
+            <!-- Rendered by JS -->
+            <p style="color:var(--cyber-blue)">Loading modules...</p>
         </div>
-    </div>
-</div>
+    </main>
 
-<script>
-    let urlChallenges = []; // Loaded dynamically
-    let currentUrl = 0;
-    let timerSecs = 10;
-    let timerInterval = null;
-    let answered = false;
+    <script>
+        const videos = {
+            email: {
+                title: "Email Phishing Awareness",
+                url: "https://youtu.be/hv9vDrtdQHM?si=Jw08TuYTsnJMdATR"
+            },
+            social: {
+                title: "Social Media Phishing",
+                url: "https://youtu.be/Rm9d3C9YzaM?si=J1X0riYXZFlWt-dU"
+            },
+            financial: {
+                title: "Financial Scam Awareness",
+                url: "https://youtu.be/XBkzBrXlle0?si=4k6AGxh6s6YZcE3w"
+            }
+        };
 
-    async function loadDynamicUrls() {
-        try {
+        function logout() {
+            localStorage.removeItem('phishguard_token');
+            localStorage.removeItem('user');
+            window.location.href = 'index.html';
+        }
+
+        async function loadModules() {
             const token = localStorage.getItem('phishguard_token');
-            const res = await fetch("http://localhost:5000/training/modules/url", {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            urlChallenges = await res.json();
-            if(urlChallenges.length > 0) {
-                currentUrl = 0;
-                startUrlTimer();
+            const user = JSON.parse(localStorage.getItem('user'));
+            if (!token || !user) {
+                window.location.href = 'index.html';
+                return;
             }
-        } catch(e) {
-            console.error(e);
-        }
-    }
 
-    function startUrlTimer() {
-        if(urlChallenges.length === 0) return;
-        clearInterval(timerInterval);
-        timerSecs = 10;
-        answered = false;
-        document.getElementById('urlTimer').textContent = timerSecs + 's';
-        document.getElementById('urlTimer').style.color = 'var(--pg-cyan)';
-        document.getElementById('btnSafe').className = 'url-btn';
-        document.getElementById('btnPhish').className = 'url-btn';
-        document.getElementById('urlFeedback').textContent = '';
-        const u = urlChallenges[currentUrl];
-        document.getElementById('urlText').textContent = u.url;
-        document.getElementById('urlRound').textContent = currentUrl + 1;
-        timerInterval = setInterval(() => {
-            timerSecs--;
-            document.getElementById('urlTimer').textContent = timerSecs + 's';
-            if (timerSecs <= 3) document.getElementById('urlTimer').style.color = 'var(--pg-red)';
-            if (timerSecs <= 0) {
-                clearInterval(timerInterval);
-                if (!answered) {
-                    answerUrl(null); // Time up! Wait, we should skip/fail.
-                }
-            }
-        }, 1000);
-    }
-
-    async function answerUrl(userSaysafe) { // true for safe, false for phish, null for timeout
-        if (answered) return;
-        answered = true;
-        clearInterval(timerInterval);
-        const u = urlChallenges[currentUrl];
-        
-        let isCorrect = false;
-        let answerStr = "timeout";
-        
-        if (userSaysafe === true) {
-            isCorrect = u.correctAnswer === "safe";
-            answerStr = "safe";
-        } else if (userSaysafe === false) {
-            isCorrect = u.correctAnswer === "phishing";
-            answerStr = "phishing";
-        }
-
-        const safBtn = document.getElementById('btnSafe');
-        const phBtn = document.getElementById('btnPhish');
-        if (isCorrect) {
-            document.getElementById('urlFeedback').textContent = 'Correct!';
-            document.getElementById('urlFeedback').style.color = 'var(--pg-green)';
-            if (userSaysafe !== null) (userSaysafe ? safBtn : phBtn).className = 'url-btn correct';
-            
-            // Submit to backend dynamics
             try {
-                const token = localStorage.getItem('phishguard_token');
-                const user = JSON.parse(localStorage.getItem('user'));
-                const timeTaken = 10 - timerSecs;
-                const res = await fetch(`http://localhost:5000/training/action`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify({ category: "url", action: "identify", userAnswer: answerStr, correct: isCorrect, timeTaken: timeTaken })
+                // Fetch user data for stats
+                const uRes = await fetch("http://localhost:5000/employee/" + user.email, {
+                    headers: { 'Authorization': `Bearer ${token}` }
                 });
-                const data = await res.json();
-                if(data.xp !== undefined) {
-                    document.getElementById('dashXP').innerText = data.xp;
-                    document.getElementById('dashStreak').innerText = `🔥 ${data.streak} days`;
-                    document.getElementById('dashRisk').innerText = data.riskScore;
-                }
-            } catch(e) { console.error(e); }
-            
-        } else {
-            document.getElementById('urlFeedback').textContent = 'Wrong or Timeout!';
-            document.getElementById('urlFeedback').style.color = 'var(--pg-red)';
-            if (userSaysafe !== null) {
-                (userSaysafe ? safBtn : phBtn).className = 'url-btn wrong';
-                (!userSaysafe ? safBtn : phBtn).className = 'url-btn correct';
-            }
-             // Submit wrong answer
-             try {
-                const token = localStorage.getItem('phishguard_token');
-                const timeTaken = 10 - timerSecs;
-                await fetch(`http://localhost:5000/training/action`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify({ category: "url", action: "identify", userAnswer: answerStr, correct: false, timeTaken: timeTaken })
+                const uData = await uRes.json();
+
+                const riskDiv = document.getElementById('uiRisk');
+                const risk = uData.riskScore || 0;
+                riskDiv.textContent = risk;
+
+                if (risk <= 30) riskDiv.style.color = 'var(--cyber-green)';
+                else if (risk <= 60) riskDiv.style.color = 'yellow';
+                else riskDiv.style.color = 'var(--cyber-red)';
+
+                document.getElementById('uiTotalXp').textContent = uData.xp || 0;
+
+                // Fetch modules
+                const mRes = await fetch(`http://localhost:5000/employee/${user.email}/modules`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
                 });
-            } catch(e) {}
-        }
-        setTimeout(nextUrl, 2500);
-    }
+                const mData = await mRes.json();
 
+                const modules = mData.modules || [];
+                const container = document.getElementById('modulesContainer');
+                container.innerHTML = '';
 
+                let totalModulesCompleted = 0;
 
-    function nextUrl() {
-        currentUrl = (currentUrl + 1) % urlChallenges.length;
-        startUrlTimer();
-    }
+                modules.forEach(mod => {
+                    let totalTasks = mod.tasks.length;
+                    let completedTasks = mod.tasks.filter(t => t.completed).length;
 
-    function openModule(id) {
-        window.location.href = 'module_' + id + '.html';
-    }
+                    if (totalTasks > 0 && completedTasks === totalTasks) {
+                        totalModulesCompleted++;
+                    }
 
-    async function loadUserData() {
-        const token = localStorage.getItem('phishguard_token');
-        let user = localStorage.getItem('user');
-        
-        if (!token || !user) {
-            window.location.href = 'login.html';
-            return;
-        }
-        
-        user = JSON.parse(user);
-        
-        try {
-            const res = await fetch(`http://localhost:5000/employee/${user.email}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const data = await res.json();
-            
-            if (data) {
-                const xp = data.xp || 0;
-                const streak = data.streak || 0;
-                const risk = data.riskScore || 0;
-                
-                document.getElementById('dashXP').innerText = xp;
-                document.getElementById('dashStreak').innerText = streak > 0 ? `🔥 ${streak} days` : '--';
-                
-                const riskEl = document.getElementById('dashRisk');
-                riskEl.innerText = risk;
-                riskEl.className = `stat-val ${risk > 60 ? 'red' : (risk > 30 ? 'amber' : 'green')}`;
-                
-                // XP Progress bar simple math
-                const rankThresholds = [0, 500, 1500, 3000, 5000];
-                const rankNames = ["Rookie", "Threat Hunter I", "Threat Hunter II", "Threat Hunter III", "Cyber Ninja"];
-                let rankIdx = 0;
-                for(let i=0; i<rankThresholds.length; i++){
-                    if(xp >= rankThresholds[i]) rankIdx = i;
-                }
-                
-                const nextThresh = rankThresholds[Math.min(rankIdx + 1, rankThresholds.length - 1)];
-                let pct = (xp / nextThresh) * 100;
-                if (xp >= 5000) pct = 100;
-                
-                document.getElementById('xpNum').innerText = `${xp} / ${nextThresh}`;
-                document.getElementById('xpFill').style.width = `${pct}%`;
-                document.querySelector('.xp-rank').innerText = `Rank: ${rankNames[rankIdx]}`;
-                
-                // Update nav-logout name too
-                const navItems = document.querySelectorAll('.nav-item');
-                navItems[navItems.length-1].innerText = `Logout (${user.name})`;
-                
-                // Render Modules Dynamically
-                const modulesGrid = document.getElementById('dynamicModulesGrid');
-                if (data.trainings && data.trainings.length > 0) {
-                    modulesGrid.innerHTML = '';
-                    let comps = 0;
-                    data.trainings.forEach(t => {
-                        if(t.status === 'completed') comps++;
-                        let statusClass = t.status === 'completed' ? 'completed' : '';
-                        let badgeClass = t.status === 'completed' ? 'badge-green' : 'badge-amber';
-                        let badgeText = t.status === 'completed' ? 'Completed' : 'In progress';
-                        
-                        let fillClass = t.status === 'completed' ? 'fill-green' : 'fill-amber';
-                        let fillWidth = t.status === 'completed' ? '100%' : '30%';
-                        let xpVal = t.difficulty === 'hard' ? 400 : (t.difficulty === 'medium' ? 300 : 200);
-                        
-                        const div = document.createElement('div');
-                        div.className = `module-card ${statusClass}`;
-                        div.innerHTML = `
-                            <div class="module-top">
-                                <div class="module-icon icon-cyan">🛡️</div>
-                                <div class="module-badges">
-                                    <span class="badge ${badgeClass}">${badgeText}</span>
-                                    <span class="badge badge-blue">+${xpVal} XP</span>
+                    const card = document.createElement('div');
+                    card.className = 'module-item';
+
+                    let lockedCSS = mod.enabled ? '' : 'opacity: 0.5; pointer-events: none; filter: grayscale(100%); position: relative;';
+                    let lockTag = mod.enabled ? '' : '<span style="position:absolute; top:20px; right:20px; background:rgba(255,0,85,0.2); border: 1px solid var(--cyber-red); color:var(--cyber-white); padding:4px 8px; border-radius:4px; font-size:0.8rem; font-family:\'Orbitron\'">🔒 LOCKED</span>';
+
+                    card.style.cssText = lockedCSS;
+
+                    let tasksHTML = '';
+                    mod.tasks.forEach(task => {
+                        const isDone = task.completed;
+                        const icon = isDone ? '✅' : '⏳';
+
+                        // Action logic - strictly UI representation right now
+                        const btnText = isDone ? 'Done' : 'Complete Task';
+                        const btnClass = isDone ? 'btn-start completed-btn' : 'btn-start';
+                        const btnDisabled = isDone ? 'disabled' : '';
+
+                        let onClickAction = `completeTask('${mod.moduleId}', '${task.type}')`;
+                        if (task.type === 'video') onClickAction = `openVideo('${mod.moduleId.split('_')[0]}', '${mod.moduleId}', '${task.type}')`;
+                        if (task.type === 'quiz') onClickAction = `openQuiz('${mod.moduleId.split('_')[0]}', '${mod.moduleId}', '${task.type}')`;
+                        if (task.type === 'simulation') onClickAction = `openSimulation('${mod.moduleId}', '${task.type}')`;
+
+                        tasksHTML += `
+                            <div class="task-row ${isDone ? 'completed' : ''}">
+                                <div>
+                                    <div class="task-name">${icon} ${task.name}</div>
+                                    <div class="task-xp">Dynamic XP</div>
                                 </div>
-                            </div>
-                            <div class="module-name">${t.name}</div>
-                            <div class="module-desc">Type: ${t.type.toUpperCase()} | Difficulty: ${t.difficulty.toUpperCase()}</div>
-                            <div class="module-footer">
-                                <span class="module-xp">+${xpVal} XP on completion</span>
-                                <span class="module-progress">${t.status}</span>
-                            </div>
-                            <div class="mini-bar">
-                                <div class="mini-fill ${fillClass}" style="width:${fillWidth}"></div>
+                                <button class="${btnClass}" ${btnDisabled} onclick="${onClickAction}">${btnText}</button>
                             </div>
                         `;
-                        // Realistically this would onClick direct to a quiz
-                        div.onclick = () => alert("Proceeding to interactive module: " + t.name);
-                        modulesGrid.appendChild(div);
                     });
-                    document.getElementById('dashMods').innerText = `${comps} / ${data.trainings.length}`;
-                } else {
-                    modulesGrid.innerHTML = '<p style="color: var(--pg-muted); font-size: 13px;">No active assignments.</p>';
-                    document.getElementById('dashMods').innerText = `0 / 0`;
-                }
-            }
-        } catch (e) {
-            console.error('Error loading data:', e);
-        }
-    }
 
-    async function loadDynamicLeaderboard() {
-        const token = localStorage.getItem('phishguard_token');
-        try {
-            const res = await fetch("http://localhost:5000/leaderboard", {
+                    card.innerHTML = `
+                        ${lockTag}
+                        <div class="module-header">
+                            <h3>${mod.title}</h3>
+                            <div class="module-status">${completedTasks}/${totalTasks} Tasks</div>
+                        </div>
+                        <div class="tasks-list">
+                            ${tasksHTML}
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+
+                document.getElementById('uiModulesDone').textContent = `${totalModulesCompleted}/3`;
+
+            } catch (err) {
+                console.error("Error loading modules", err);
+                document.getElementById('modulesContainer').innerHTML = `<p style="color:red">Failed to connect to server.</p>`;
+            }
+        }
+
+        /* --- VIDEO LOGIC --- */
+        let videoWatchProgress = 0;
+        let videoInterval;
+
+        function openVideo(category, moduleId, taskType) {
+            const video = videos[category] || videos['email'];
+            const container = document.getElementById("modulesContainer");
+
+            videoWatchProgress = 0;
+            videoInterval = setInterval(() => { videoWatchProgress++ }, 1000);
+
+            container.innerHTML = `
+            <div style="background:#111; padding:20px; border-radius:10px;">
+                <h2>${video.title}</h2>
+                <iframe width="100%" height="400" src="${video.url}" frameborder="0" allowfullscreen></iframe>
+                <br><br>
+                <div style="display:flex; gap:10px;">
+                    <button class="btn-start" onclick="markVideoDone('${moduleId}', '${taskType}')">Finish Video (+50 XP)</button>
+                    <button class="btn-start" style="background: rgba(255, 0, 85, 0.1); color: var(--cyber-red); border: 1px solid var(--cyber-red);" onclick="skipVideo('${moduleId}', '${taskType}')">Skip Video (+0 XP)</button>
+                </div>
+                <br><br><button onclick="clearInterval(videoInterval); loadModules()">⬅ Back</button>
+            </div>`;
+        }
+
+        function markVideoDone(moduleId, taskType) {
+            clearInterval(videoInterval);
+            completeTask(moduleId, taskType, 50);
+        }
+
+        function skipVideo(moduleId, taskType) {
+            clearInterval(videoInterval);
+            completeTask(moduleId, taskType, 0);
+        }
+
+        /* --- SIMULATION LOGIC --- */
+        async function openSimulation(category, moduleId, taskType) {
+            const token = localStorage.getItem('phishguard_token');
+            const res = await fetch(`http://localhost:5000/api/simulation/${category}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            const users = await res.json();
-            const lb = document.getElementById("dynamicLeaderboard");
-            let html = '';
-            const user = JSON.parse(localStorage.getItem('user'));
+            const sims = await res.json();
             
-            users.forEach((u, idx) => {
-                let rankClass = '';
-                if (idx === 0) rankClass = 'gold';
-                else if (idx === 1) rankClass = 'silver';
-                else if (idx === 2) rankClass = 'bronze';
-                
-                let extraStyles = u.email === user.email ? 'background: rgba(0,229,200,0.05); border-radius: 6px; padding: 9px 6px;' : '';
-                let nameClass = u.email === user.email ? 'you' : '';
-                
-                html += `
-                    <div class="lb-row" style="${extraStyles}">
-                        <span class="lb-rank ${rankClass}">${idx + 1}</span>
-                        <div class="lb-avatar">${u.name.substring(0,2).toUpperCase()}</div>
-                        <span class="lb-name ${nameClass}">${u.name}</span>
-                        <span class="lb-streak">🔥 ${u.streak}</span>
-                        <span class="lb-score">${u.xp} XP</span>
-                    </div>
-                `;
+            if (!sims || sims.length === 0) {
+                alert("No simulations found for this category! Contact Admin.");
+                return;
+            }
+
+            const sim = sims[0]; 
+
+            const container = document.getElementById("modulesContainer");
+
+            container.innerHTML = `
+        <div style="background:#111; padding:20px; border-radius:10px;">
+            <h3 style="color: var(--cyber-yellow); margin-bottom: 10px; font-family:'Orbitron', sans-serif;">Simulation Sandbox</h3>
+            <h2 style="margin-bottom: 20px;">${sim.title}</h2>
+            <div style="padding: 15px; margin: 15px 0; background: rgba(0, 217, 255, 0.1); border-left: 4px solid var(--cyber-blue); line-height: 1.6; font-style: italic;">
+                "${sim.emailContent}"
+            </div>
+            <h3 style="margin-bottom: 15px;">${sim.question}</h3>
+            <div id="options"></div>
+            <br><button onclick="loadModules()">⬅ Exit Early</button>
+        </div>
+    `;
+
+            const optionsDiv = document.getElementById("options");
+
+            sim.options.forEach((opt, index) => {
+                const btn = document.createElement("button");
+                btn.innerText = opt;
+                btn.style.cssText = "display:block; width:100%; text-align:left; margin-bottom: 10px; padding: 12px; background: rgba(0, 217, 255, 0.05); border: 1px solid var(--cyber-blue); color: #fff; cursor: pointer; border-radius: 6px; transition: 0.2s;";
+                btn.onmouseover = () => { btn.style.background='var(--cyber-blue)'; btn.style.color='#000'; };
+                btn.onmouseout = () => { btn.style.background='rgba(0, 217, 255, 0.05)'; btn.style.color='#fff'; };
+                btn.onclick = () => checkSimulationAnswer(index, sim.answer, moduleId, taskType);
+
+                optionsDiv.appendChild(btn);
             });
-            lb.innerHTML = html;
-        } catch (e) {
-            console.error(e);
         }
-    }
+        
+        function checkSimulationAnswer(selectedIndex, correctIndex, moduleId, taskType) {
+            const container = document.getElementById("modulesContainer");
+            
+            let earnedXp = 0;
+            let resultMessage = "";
+            let color = "";
+            let resultTitle = "";
+            
+            if (selectedIndex === correctIndex) {
+                earnedXp = 100;
+                resultTitle = "Correct! 🛡️";
+                resultMessage = "Great job identifying the red flags. You successfully mitigated the phishing attempt.";
+                color = "var(--cyber-green)";
+            } else {
+                earnedXp = 0;
+                resultTitle = "Compromised! ❌";
+                resultMessage = "You fell for the simulation. Always verify links and urgent requests before acting.";
+                color = "var(--cyber-red)";
+            }
+            
+            container.innerHTML = `
+            <div style="background:#111; padding:30px; border-radius:10px; text-align: center;">
+                <h2 style="color: ${color}">${resultTitle}</h2>
+                <p style="font-size: 1.1rem; margin: 15px 0;">${resultMessage}</p>
+                <p style="color: var(--cyber-green); margin-bottom: 20px; font-weight: bold; font-size: 1.1rem;">You earned +${earnedXp} XP!</p>
+                <button class="btn-start" onclick="completeTask('${moduleId}', '${taskType}', ${earnedXp})">Finish & Save</button>
+            </div>`;
+        }
 
-    document.querySelector('.nav-logout').addEventListener('click', () => {
-        localStorage.removeItem('phishguard_token');
-        localStorage.removeItem('user');
-        window.location.href = 'login.html';
-    });
+        /* --- QUIZ LOGIC --- */
+        let currentQuizQuestions = [];
+        let currentQuizScore = 0;
+        let currentQuizIndex = 0;
 
-    loadUserData();
-    loadDynamicLeaderboard();
-    setInterval(loadDynamicLeaderboard, 10000);
-    loadDynamicUrls();
-</script>
+        async function openQuiz(category, moduleId, taskType) {
+            try {
+                const token = localStorage.getItem('phishguard_token');
+                const res = await fetch(`http://localhost:5000/quiz/${category}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                currentQuizQuestions = await res.json();
+
+                if (!currentQuizQuestions || currentQuizQuestions.length === 0) {
+                    alert("No quiz questions found for this category! Contact Admin.");
+                    return;
+                }
+
+                currentQuizScore = 0;
+                currentQuizIndex = 0;
+                renderQuizStep(moduleId, taskType);
+            } catch (err) {
+                console.error("Quiz load error:", err);
+            }
+        }
+
+        function renderQuizStep(moduleId, taskType) {
+            const container = document.getElementById("modulesContainer");
+            if (currentQuizIndex >= currentQuizQuestions.length) {
+                let percent = (currentQuizScore / currentQuizQuestions.length) * 100;
+                let earnedXp = 10;
+                if (percent >= 80) earnedXp = 50;
+                else if (percent >= 50) earnedXp = 30;
+
+                container.innerHTML = `
+                <div style="background:#111; padding:30px; border-radius:10px; text-align: center;">
+                    <h2>Quiz Completed!</h2>
+                    <p style="font-size: 1.2rem; margin: 15px 0;">You scored ${currentQuizScore} out of ${currentQuizQuestions.length} (${Math.round(percent)}%).</p>
+                    <p style="color: var(--cyber-green); margin-bottom: 20px; font-weight: bold; font-size: 1.1rem;">You earned +${earnedXp} XP!</p>
+                    <button class="btn-start" onclick="completeTask('${moduleId}', '${taskType}', ${earnedXp})">Save Result</button>
+                </div>`;
+                return;
+            }
+
+            const q = currentQuizQuestions[currentQuizIndex];
+            let optionsHTML = '';
+            q.options.forEach((opt, index) => {
+                optionsHTML += `<button style="display:block; width:100%; text-align:left; margin-bottom: 10px; padding: 12px; background: rgba(0, 217, 255, 0.05); border: 1px solid var(--cyber-blue); color: #fff; cursor: pointer; border-radius: 6px; transition: 0.2s;" onmouseover="this.style.background='var(--cyber-blue)'; this.style.color='#000';" onmouseout="this.style.background='rgba(0, 217, 255, 0.05)'; this.style.color='#fff';" onclick="checkAnswer(${index}, ${q.answer}, '${moduleId}', '${taskType}')">${opt}</button>`;
+            });
+
+            container.innerHTML = `
+            <div style="background:#111; padding:20px; border-radius:10px;">
+                <h3 style="color: var(--cyber-yellow); margin-bottom: 10px; font-family:'Orbitron', sans-serif;">Question ${currentQuizIndex + 1} of ${currentQuizQuestions.length}</h3>
+                <p style="font-size: 0.9rem; color: #888; margin-bottom: 15px;">${q.scenario || ''}</p>
+                <h2 style="margin-bottom: 20px;">${q.question}</h2>
+                <div>${optionsHTML}</div>
+                <br><br><button onclick="loadModules()">⬅ Exit Quiz Early</button>
+            </div>`;
+        }
+
+        function checkAnswer(selectedIndex, correctIndex, moduleId, taskType) {
+            if (selectedIndex === correctIndex) {
+                currentQuizScore++;
+            }
+            currentQuizIndex++;
+            renderQuizStep(moduleId, taskType);
+        }
+
+        /* --- API COMPLETION ROUTER --- */
+        async function completeTask(moduleId, taskType, earnedXp) {
+            const token = localStorage.getItem('phishguard_token');
+            const user = JSON.parse(localStorage.getItem('user'));
+
+            try {
+                const res = await fetch(`http://localhost:5000/employee/${user.email}/complete-task`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ moduleId, taskType, earnedXp })
+                });
+                const data = await res.json();
+
+                if (data.xp !== undefined) {
+                    loadModules();
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        window.onload = loadModules;
+    </script>
+</body>
+
+</html>

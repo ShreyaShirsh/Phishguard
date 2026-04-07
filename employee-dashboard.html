@@ -490,7 +490,7 @@
             };
             
             // Initial fallback render
-            let currentScore = localUser.riskScore ? localUser.riskScore : Math.floor(Math.random() * 20) + 10;
+            let currentScore = localUser.riskScore !== undefined && localUser.riskScore !== null ? localUser.riskScore : 0;
             updateDashboard(currentScore);
             
             // Function to fetch live details
@@ -514,8 +514,8 @@
                     localStorage.setItem("user", JSON.stringify(localUser));
 
                     // Render dynamic lists based on deep User schema
-                    if (user.trainings) {
-                        renderAssignedTrainings(user.trainings);
+                    if (user.modules) {
+                        renderAssignedTrainings(user.modules);
                     }
 
                 } catch (err) {
@@ -542,30 +542,40 @@
             document.getElementById('btn' + tabName.charAt(0).toUpperCase() + tabName.slice(1)).classList.add('active');
         }
 
-        function renderAssignedTrainings(trainings) {
+        function renderAssignedTrainings(modules) {
             const list = document.getElementById('assignedTrainingList');
             list.innerHTML = '';
             
-            if (!trainings || trainings.length === 0) {
+            if (!modules || modules.length === 0) {
                 list.innerHTML = '<li class="training-item"><p style="color:#888;">No training assigned.</p></li>';
                 return;
             }
 
-            trainings.forEach(t => {
+            let activeModules = modules.filter(m => m.enabled === true);
+            if (activeModules.length === 0) {
+                list.innerHTML = '<li class="training-item"><p style="color:#888;">No training assigned.</p></li>';
+                return;
+            }
+
+            activeModules.forEach(mod => {
                 const item = document.createElement('li');
                 item.className = 'training-item';
                 
+                const totalTasks = mod.tasks.length;
+                const completedTasks = mod.tasks.filter(t => t.completed).length;
+                const isCompleted = completedTasks === totalTasks && totalTasks > 0;
+                
                 let actionHtml = '';
-                if (t.status === 'completed') {
-                    actionHtml = `<span style="color: var(--cyber-green); font-size: 0.9rem;">✓ Pass (${t.score}%)</span>`;
+                if (isCompleted) {
+                    actionHtml = `<span style="color: var(--cyber-green); font-size: 0.9rem;">✓ Passed</span>`;
                 } else {
                     actionHtml = `<button class="btn-start" onclick="window.location.href='gamified_training.html'">Start</button>`;
                 }
 
                 item.innerHTML = `
                     <div>
-                        <strong>${t.name}</strong>
-                        <p style="font-size: 0.8rem; color: #888; margin-top: 4px;">${t.status === 'completed' ? 'Completed' : 'Due in ' + t.dueDate}</p>
+                        <strong>${mod.title}</strong>
+                        <p style="font-size: 0.8rem; color: #888; margin-top: 4px;">Status: ${completedTasks}/${totalTasks} Tasks</p>
                     </div>
                     ${actionHtml}
                 `;

@@ -1,0 +1,242 @@
+[
+    {
+        "category": "email",
+        "question": "What is the biggest red flag?",
+        "scenario": "Internship Selection email asking for bank details and ID proof.",
+        "options": [
+            "Amazon offers internships",
+            "Requesting sensitive financial details before hiring",
+            "Email contains your name",
+            "Email mentions stipend"
+        ],
+        "answer": 1
+    },
+    {
+        "category": "email",
+        "question": "What makes this email suspicious?",
+        "scenario": "Sender: microsoft.hr.recruitment@gmail.com",
+        "options": [
+            "Interview invitation",
+            "Gmail domain instead of official company email",
+            "HR department contacting you",
+            "Mention of job role"
+        ],
+        "answer": 1
+    },
+    {
+        "category": "email",
+        "question": "What should you do?",
+        "scenario": "Download JobDescription.exe to view job offer",
+        "options": [
+            "Download immediately",
+            "Ignore and verify sender",
+            "Forward to friends",
+            "Rename file"
+        ],
+        "answer": 1
+    },
+    {
+        "category": "email",
+        "question": "Which phishing tactic is used?",
+        "scenario": "Internship expires in 2 hours",
+        "options": [
+            "Friendly greeting",
+            "Urgency and pressure",
+            "Detailed job description",
+            "Formal language"
+        ],
+        "answer": 1
+    },
+    {
+        "category": "email",
+        "question": "What should you do?",
+        "scenario": "https://tcs-career-portal-login.xyz",
+        "options": [
+            "Log in immediately",
+            "Enter credentials",
+            "Visit official website",
+            "Send resume"
+        ],
+        "answer": 2
+    },
+    {
+        "category": "email",
+        "question": "What type of scam is this?",
+        "scenario": "Pay ₹1200 to secure interview",
+        "options": [
+            "Credential phishing",
+            "Financial job scam",
+            "Social media scam",
+            "Malware attack"
+        ],
+        "answer": 1
+    },
+    {
+        "category": "email",
+        "question": "What is the safest action?",
+        "scenario": "Verify your email password to upgrade system",
+        "options": [
+            "Enter password",
+            "Reply with credentials",
+            "Contact IT officially",
+            "Ignore forever"
+        ],
+        "answer": 2
+    },
+    {
+        "category": "email",
+        "question": "What does this indicate?",
+        "scenario": "Form asking for password, OTP, bank details",
+        "options": [
+            "Legitimate HR process",
+            "Internship verification",
+            "Phishing attempt",
+            "Security check"
+        ],
+        "answer": 2
+    },
+    {
+        "category": "email",
+        "question": "Why is this suspicious?",
+        "scenario": "Login with Gmail for recruitment",
+        "options": [
+            "Recruiters contact candidates",
+            "Asking for login credentials",
+            "Offering job",
+            "Application link"
+        ],
+        "answer": 1
+    },
+    {
+        "category": "email",
+        "question": "What should you do first?",
+        "scenario": "Download InterviewSchedule.zip",
+        "options": [
+            "Open ZIP",
+            "Verify sender",
+            "Send to coworkers",
+            "Upload online"
+        ],
+        "answer": 1
+    },
+    {
+        "category": "email",
+        "question": "What type of phishing is this?",
+        "scenario": "CEO asks to buy gift cards urgently",
+        "options": [
+            "Delivery scam",
+            "CEO fraud / Business Email Compromise",
+            "Malware phishing",
+            "Job scam"
+        ],
+        "answer": 1
+    },
+    {
+        "category": "email",
+        "question": "What should you check first?",
+        "scenario": "Email from hr@infosys-careers.net",
+        "options": [
+            "Salary",
+            "Email domain authenticity",
+            "Attachment size",
+            "Font style"
+        ],
+        "answer": 1
+    },
+    {
+        "category": "email",
+        "question": "What should you suspect?",
+        "scenario": "Survey gives ₹500 bonus",
+        "options": [
+            "Marketing promotion",
+            "Phishing collecting personal information",
+            "Training program",
+            "Scholarship survey"
+        ],
+        "answer": 1
+    },
+    {
+        "category": "email",
+        "question": "What should you do?",
+        "scenario": "Reset LinkedIn password via email",
+        "options": [
+            "Click link",
+            "Use official website",
+            "Reply",
+            "Ignore"
+        ],
+        "answer": 1
+    },
+    {
+        "category": "email",
+        "question": "What is suspicious?",
+        "scenario": "Send Aadhaar and bank details after job confirmation",
+        "options": [
+            "Job confirmation email",
+            "Requesting sensitive data early",
+            "Company hiring",
+            "Salary mentioned"
+        ],
+        "answer": 1
+    },
+    {
+        "category": "email",
+        "question": "What phishing sign is this?",
+        "scenario": "Congratulation!! You selected for job",
+        "options": [
+            "Professional writing",
+            "Poor grammar and spelling",
+            "Detailed job description",
+            "Clear instructions"
+        ],
+        "answer": 1
+    },
+    {
+        "category": "email",
+        "question": "What should you do?",
+        "scenario": "Internship offer from unknown company",
+        "options": [
+            "Accept immediately",
+            "Verify company",
+            "Share resume",
+            "Send personal details"
+        ],
+        "answer": 1
+    },
+    {
+        "category": "email",
+        "question": "What does this indicate?",
+        "scenario": "HR survey asking email password",
+        "options": [
+            "HR survey",
+            "Security check",
+            "Credential phishing",
+            "Employee feedback"
+        ],
+        "answer": 2
+    },
+    {
+        "category": "email",
+        "question": "What is the biggest warning sign?",
+        "scenario": "http://google-careers-login.security-check.ru",
+        "options": [
+            "Company name",
+            "Suspicious domain (.ru)",
+            "Login page",
+            "Email subject"
+        ],
+        "answer": 1
+    },
+    {
+        "category": "email",
+        "question": "What should you suspect?",
+        "scenario": "Earn ₹80,000 per week with no experience",
+        "options": [
+            "Legitimate opportunity",
+            "Phishing or job scam",
+            "Internship training",
+            "Government program"
+        ],
+        "answer": 1
+    }
+]

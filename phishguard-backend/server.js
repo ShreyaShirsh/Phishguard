@@ -3,6 +3,8 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const fs = require("fs");
+const path = require("path");
 
 const app = express();
 
@@ -15,7 +17,7 @@ const verifyToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
     if (!token) return res.status(401).json({ error: "Access Denied ❌" });
-    
+
     jwt.verify(token, JWT_SECRET, (err, user) => {
         if (err) return res.status(403).json({ error: "Invalid Token ❌" });
         req.user = user;
@@ -25,11 +27,35 @@ const verifyToken = (req, res, next) => {
 
 const User = require("./models/User");
 const Campaign = require("./models/campaign");
-const { UrlChallenge, EmailChallenge, AttachmentChallenge, SocialChallenge, UserAction } = require("./models/TrainingData");
+const Quiz = require("./models/quiz");
+const Simulation = require("./models/simulation");
+
 
 mongoose.connect("mongodb://127.0.0.1:27017/phishguard")
-.then(() => console.log("MongoDB Connected ✅"))
-.catch(err => console.log(err));
+    .then(() => console.log("MongoDB Connected ✅"))
+    .catch(err => console.log(err));
+
+// 🔥 FETCH QUIZZES BY CATEGORY
+app.get("/quiz/:category", verifyToken, async (req, res) => {
+    try {
+        const categoryMap = {
+            "email_phishing": "email",
+            "social_media": "social",
+            "financial": "financial"
+        };
+        const mappedCat = categoryMap[req.params.category] || req.params.category;
+
+        // Use an aggregation to pull 5 random quizzes
+        const quizzes = await Quiz.aggregate([
+            { $match: { category: mappedCat } },
+            { $sample: { size: 5 } }
+        ]);
+
+        res.json(quizzes);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
 
 app.get("/", (req, res) => {
     res.send("PhishGuard Backend Running 🚀");
@@ -81,7 +107,7 @@ app.post("/campaign", verifyToken, async (req, res) => {
     try {
         if (req.user.role !== "admin") return res.status(403).json({ error: "Access Denied: Admin Only ❌" });
         const { campaignName, template, category, department, createdBy } = req.body;
-        
+
         let targetedEmployees = 0;
         if (department === "All" || !department) {
             targetedEmployees = await User.countDocuments({ role: "employee" });
@@ -114,6 +140,34 @@ app.get("/campaigns", verifyToken, async (req, res) => {
     }
 });
 
+app.get("/api/quiz/:category", async (req, res) => {
+    try {
+        const data = await Quiz.find({ category: req.params.category });
+        res.json(data);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.get("/api/simulation/:category", verifyToken, async (req, res) => {
+    try {
+        const categoryMap = {
+            "email_phishing": "email",
+            "social_media": "social",
+            "financial": "financial"
+        };
+        const mappedCat = categoryMap[req.params.category] || req.params.category;
+        
+        const data = await Simulation.aggregate([
+            { $match: { category: mappedCat } },
+            { $sample: { size: 1 } }
+        ]);
+        res.json(data);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // 🗑 DELETE CAMPAIGN
 app.delete("/campaign/:id", verifyToken, async (req, res) => {
     try {
@@ -132,7 +186,7 @@ app.get("/stats", verifyToken, async (req, res) => {
         const totalEmployees = await User.countDocuments({ role: "employee" });
         const campaigns = await Campaign.find();
         const activeCampaigns = campaigns.length;
-        
+
         let totalTargeted = 0;
         let totalOpened = 0;
         let totalClicked = 0;
@@ -150,12 +204,12 @@ app.get("/stats", verifyToken, async (req, res) => {
                 c.clicked = Math.min(c.opened, c.clicked + newClicks);
             }
             await c.save();
-            
+
             totalTargeted += c.targetedEmployees;
             totalOpened += c.opened;
             totalClicked += c.clicked;
         }
-        
+
         let clickRate = 0;
         if (totalTargeted > 0) {
             clickRate = ((totalClicked / totalTargeted) * 100).toFixed(1);
@@ -179,7 +233,7 @@ app.get("/stats", verifyToken, async (req, res) => {
         ];
 
         const topCampaigns = campaigns.slice(0, 3).map(c => {
-            const openRate = c.targetedEmployees > 0 ? ((c.opened / c.targetedEmployees) * 100).toFixed(1) : 0; 
+            const openRate = c.targetedEmployees > 0 ? ((c.opened / c.targetedEmployees) * 100).toFixed(1) : 0;
             let risk = "Low";
             if (openRate > 65) risk = "High";
             else if (openRate > 50) risk = "Moderate";
@@ -187,7 +241,7 @@ app.get("/stats", verifyToken, async (req, res) => {
         });
 
         // Fill if fewer than 3 campaigns
-        while(topCampaigns.length < 3) {
+        while (topCampaigns.length < 3) {
             topCampaigns.push({ name: "Pending Deployment", openRate: "0%", risk: "Low" });
         }
 
@@ -196,7 +250,7 @@ app.get("/stats", verifyToken, async (req, res) => {
         let medCount = 0;
         let highCount = 0;
         const employees = await User.find({ role: "employee" });
-        
+
         for (let emp of employees) {
             // Need to handle if riskScore is uninitialized for some reason, default 0 -> Low
             if (emp.riskScore > 60) highCount++;
@@ -205,11 +259,11 @@ app.get("/stats", verifyToken, async (req, res) => {
         }
 
         const totalEmpStats = employees.length > 0 ? employees.length : 1; // avoid division by zero
-        
-        const riskBreakdown = { 
-            low: Math.round((lowCount / totalEmpStats) * 100), 
-            med: Math.round((medCount / totalEmpStats) * 100), 
-            high: Math.round((highCount / totalEmpStats) * 100) 
+
+        const riskBreakdown = {
+            low: Math.round((lowCount / totalEmpStats) * 100),
+            med: Math.round((medCount / totalEmpStats) * 100),
+            high: Math.round((highCount / totalEmpStats) * 100)
         };
 
         res.json({
@@ -230,14 +284,9 @@ app.get("/stats", verifyToken, async (req, res) => {
 app.get("/employees", verifyToken, async (req, res) => {
     try {
         if (req.user.role !== "admin") return res.status(403).json({ error: "Access Denied: Admin Only ❌" });
-        const employees = await User.find({ role: "employee" }, "-password"); 
-        
-        for (let emp of employees) {
-            if (!emp.riskScore || emp.riskScore === 0) {
-                emp.riskScore = Math.floor(Math.random() * 85) + 1;
-                await emp.save();
-            }
-        }
+        const employees = await User.find({ role: "employee" }, "-password");
+
+
         res.json(employees);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -278,39 +327,39 @@ app.post("/employee/:email/complete-training", verifyToken, async (req, res) => 
         performanceScore = Math.max(0, Math.min(100, Number(performanceScore) || 0));
 
         const employee = await User.findOne({ email: req.params.email, role: "employee" });
-        if(!employee) return res.status(404).json({ error: "Employee not found ❌" });
+        if (!employee) return res.status(404).json({ error: "Employee not found ❌" });
 
         // Ensure trainings exist for legacy docs
-        if(!employee.trainings) employee.trainings = [];
-        
+        if (!employee.trainings) employee.trainings = [];
+
         const tIndex = employee.trainings.findIndex(t => t.id === moduleId);
-        if(tIndex === -1) return res.status(404).json({ error: "Training module not found ❌" });
-        
+        if (tIndex === -1) return res.status(404).json({ error: "Training module not found ❌" });
+
         let training = employee.trainings[tIndex];
         training.score = performanceScore;
         training.attempts += 1;
         training.status = "completed";
         training.completedAt = new Date().toISOString();
-        
+
         // Calculate riskReduction = base(5) * difficultyWeight * performanceFactor
         let difficultyWeight = 1;
-        if(training.difficulty === "medium") difficultyWeight = 1.5;
-        if(training.difficulty === "hard") difficultyWeight = 2;
-        
+        if (training.difficulty === "medium") difficultyWeight = 1.5;
+        if (training.difficulty === "hard") difficultyWeight = 2;
+
         let performanceFactor = 0.4;
-        if(performanceScore >= 80) performanceFactor = 1;
-        else if(performanceScore >= 50) performanceFactor = 0.7;
-        
+        if (performanceScore >= 80) performanceFactor = 1;
+        else if (performanceScore >= 50) performanceFactor = 0.7;
+
         const riskReduction = Math.round(5 * difficultyWeight * performanceFactor);
-        
+
         employee.trainings[tIndex] = training;
         employee.markModified("trainings");
-        
+
         employee.riskScore = Math.max(0, employee.riskScore - riskReduction);
         await employee.save();
-        
+
         res.json({ message: "Training Completed ✅", riskReduction, newScore: employee.riskScore });
-    } catch(err) {
+    } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
@@ -320,9 +369,9 @@ app.post("/employee/:email/gamified-complete", verifyToken, async (req, res) => 
     try {
         if (req.user.role !== "admin" && req.user.email !== req.params.email) return res.status(403).json({ error: "Access Denied ❌" });
         const { moduleId, xpEarned, passed } = req.body;
-        
+
         const employee = await User.findOne({ email: req.params.email, role: "employee" });
-        if(!employee) return res.status(404).json({ error: "Employee not found ❌" });
+        if (!employee) return res.status(404).json({ error: "Employee not found ❌" });
 
         // Update XP
         employee.xp = (employee.xp || 0) + (xpEarned || 0);
@@ -330,7 +379,7 @@ app.post("/employee/:email/gamified-complete", verifyToken, async (req, res) => 
         // Update Streak
         const now = new Date();
         const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-        
+
         let lastDate = 0;
         if (employee.lastTrainingDate) {
             const ld = new Date(employee.lastTrainingDate);
@@ -347,14 +396,14 @@ app.post("/employee/:email/gamified-complete", verifyToken, async (req, res) => 
         } else if (diffDays === 0 && !employee.streak) {
             employee.streak = 1; // First training ever for the day
         }
-        
+
         employee.lastTrainingDate = now;
 
         // Reduce risk score slightly based on XP
         if (passed) {
             const riskReduction = Math.floor((xpEarned || 0) / 50);
             employee.riskScore = Math.max(0, employee.riskScore - riskReduction);
-            
+
             if (!employee.trainings) employee.trainings = [];
             const tIndex = employee.trainings.findIndex(t => t.id === moduleId);
             if (tIndex >= 0) {
@@ -366,13 +415,13 @@ app.post("/employee/:email/gamified-complete", verifyToken, async (req, res) => 
 
         await employee.save();
 
-        res.json({ 
-            message: "Module Completed ✅", 
-            xp: employee.xp, 
-            streak: employee.streak, 
-            riskScore: employee.riskScore 
+        res.json({
+            message: "Module Completed ✅",
+            xp: employee.xp,
+            streak: employee.streak,
+            riskScore: employee.riskScore
         });
-    } catch(err) {
+    } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
@@ -382,10 +431,10 @@ app.post("/employee/:email/gamified-complete", verifyToken, async (req, res) => 
 app.post("/employee/:email/simulation", verifyToken, async (req, res) => {
     try {
         if (req.user.role !== "admin" && req.user.email !== req.params.email) return res.status(403).json({ error: "Access Denied ❌" });
-        const { reported, campaignId } = req.body; 
+        const { reported, campaignId } = req.body;
         const employee = await User.findOne({ email: req.params.email, role: "employee" });
-        if(!employee) return res.status(404).json({ error: "Employee not found ❌" });
-        
+        if (!employee) return res.status(404).json({ error: "Employee not found ❌" });
+
         let targetCategory = "General";
         if (campaignId) {
             const campaign = await Campaign.findById(campaignId);
@@ -393,51 +442,51 @@ app.post("/employee/:email/simulation", verifyToken, async (req, res) => {
                 targetCategory = campaign.category;
             }
         }
-        
+
         if (!employee.phishingStats) employee.phishingStats = { emailsReceived: 0, linksClicked: 0, reportsSubmitted: 0 };
         if (!employee.categoryFails) employee.categoryFails = {};
 
         employee.phishingStats.emailsReceived += 1;
         let scoreChange = 0;
         let assignedModule = null;
-        
+
         if (reported) {
             employee.phishingStats.reportsSubmitted += 1;
             scoreChange = -10;
         } else {
             employee.phishingStats.linksClicked += 1;
-            scoreChange = 15;
-            
+            scoreChange = 5;
+
             // Track Category Fail
             employee.categoryFails[targetCategory] = (employee.categoryFails[targetCategory] || 0) + 1;
             employee.markModified('categoryFails');
 
-            // Auto-assign training based on category
+            // Re-assign training module dynamically based on campaign category group
             const categoryMapping = {
-                "Financial": "phishing_detection",
-                "HR": "social_engineering",
-                "Delivery": "safe_browsing",
-                "Cloud": "password_hygiene",
-                "Security": "incident_response",
-                "General": "email_scrutiny"
+                "Email Scrutiny Phishing": "email_phishing",
+                "Financial Phishing": "financial",
+                "Social Frauds": "social_media"
             };
-            
-            const moduleId = categoryMapping[targetCategory] || "email_scrutiny";
-            if (!employee.trainings) employee.trainings = [];
-            
-            const tIndex = employee.trainings.findIndex(t => t.id === moduleId);
-            if (tIndex >= 0) {
-                employee.trainings[tIndex].status = "pending"; // Re-assign if completed
-                employee.markModified('trainings');
-                assignedModule = employee.trainings[tIndex].name;
+
+            const moduleId = categoryMapping[targetCategory] || "email_phishing";
+
+            if (employee.modules && employee.modules.length > 0) {
+                const tIndex = employee.modules.findIndex(t => t.moduleId === moduleId);
+                if (tIndex >= 0) {
+                    employee.modules[tIndex].enabled = true; // Unlock the module!
+
+                    employee.markModified('modules');
+                    assignedModule = employee.modules[tIndex].title;
+                }
             }
         }
-        
-        employee.riskScore = Math.max(0, Math.min(100, employee.riskScore + scoreChange));
+
+        // Apply risk score, capped between 0 and 100
+        employee.riskScore = Math.max(0, Math.min(100, (employee.riskScore || 0) + scoreChange));
         await employee.save();
-        res.json({ 
-            message: "Simulation logged ✅", 
-            newScore: employee.riskScore, 
+        res.json({
+            message: "Simulation logged ✅",
+            newScore: employee.riskScore,
             stats: employee.phishingStats,
             assignedTraining: assignedModule
         });
@@ -452,22 +501,22 @@ app.post("/admin/assign-training", verifyToken, async (req, res) => {
         if (req.user.role !== "admin") return res.status(403).json({ error: "Access Denied: Admin Only ❌" });
         const { targetEmail, trainingModule } = req.body;
         const employee = await User.findOne({ email: targetEmail, role: "employee" });
-        if(!employee) return res.status(404).json({ error: "Employee not found ❌" });
-        if(!employee.trainings) employee.trainings = [];
-        
+        if (!employee) return res.status(404).json({ error: "Employee not found ❌" });
+        if (!employee.trainings) employee.trainings = [];
+
         // Prevent exact duplicate ID assignment unless intentional, but for now just push
         const existingIndex = employee.trainings.findIndex(t => t.id === trainingModule.id);
-        if(existingIndex >= 0) {
+        if (existingIndex >= 0) {
             // overwrite or ignore? let's overwrite to re-assign
             employee.trainings[existingIndex] = trainingModule;
         } else {
             employee.trainings.push(trainingModule);
         }
-        
+
         employee.markModified("trainings");
         await employee.save();
         res.json({ message: "Training Assigned ✅", trainings: employee.trainings });
-    } catch(err) {
+    } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
@@ -485,89 +534,72 @@ app.get("/leaderboard", verifyToken, async (req, res) => {
     }
 });
 
-// 🔥 FETCH DYNAMIC TRAINING CHALLENGES
-app.get("/training/modules/:category", verifyToken, async (req, res) => {
+// 🔥 FETCH DYNAMIC TRAINING MODULES
+app.get("/employee/:email/modules", verifyToken, async (req, res) => {
     try {
-        let data;
-        switch(req.params.category) {
-            case "url": 
-                data = await UrlChallenge.find(); 
-                break;
-            case "email": 
-                data = await EmailChallenge.find(); 
-                break;
-            case "attachment": 
-                data = await AttachmentChallenge.find(); 
-                break;
-            case "social": 
-                data = await SocialChallenge.findOne(); 
-                break;
-            default:
-                return res.status(400).json({ error: "Invalid category ❌" });
-        }
-        res.json(data);
+        const employee = await User.findOne({ email: req.params.email });
+        if (!employee) return res.status(404).json({ error: "Employee not found ❌" });
+        res.json({ modules: employee.modules });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-// 🔥 SUBMIT DYNAMIC TRAINING ACTION
-app.post("/training/action", verifyToken, async (req, res) => {
+// 🔥 COMPLETE TASK IN MODULE
+app.post("/employee/:email/complete-task", verifyToken, async (req, res) => {
     try {
-        const { category, action, userAnswer, correct, timeTaken } = req.body;
-        const employee = await User.findById(req.user.id);
-        
+        const { moduleId, taskType, earnedXp } = req.body;
+        const employee = await User.findOne({ email: req.params.email });
+
         if (!employee) return res.status(404).json({ error: "Employee not found ❌" });
 
-        // Record UserAction
-        const newAction = new UserAction({
-            userId: employee._id,
-            category,
-            action,
-            userAnswer,
-            correct,
-            timeTaken
-        });
-        await newAction.save();
+        let xpEarned = 0;
+        let taskFound = false;
 
-        // Calculate XP logic
-        let xpGained = 0;
-        let riskReduction = 0;
-        if (correct) {
-            xpGained = 50; // standard base
-            if (timeTaken < 5) xpGained += 10; // speed bonus
-            riskReduction = 2; // reduce risk slightly
-        } else {
-            riskReduction = -1; // penalty
+        // Iterate modules to update the specific task completion
+        if (employee.modules && employee.modules.length > 0) {
+            employee.modules.forEach(mod => {
+                if (mod.moduleId === moduleId) {
+                    mod.tasks.forEach(task => {
+                        if (task.type === taskType && !task.completed) {
+                            task.completed = true;
+                            xpEarned = earnedXp !== undefined ? earnedXp : task.xp;
+                            taskFound = true;
+                        }
+                    });
+                }
+            });
         }
 
-        employee.xp += xpGained;
-        
-        // Update streak logic: if last training was > 24 hrs ago but < 48 hrs, increment. else set to 1.
-        const now = new Date();
-        const lastDate = employee.lastTrainingDate || new Date(now.getTime() - 8640000000); // long time ago
-        const diffHours = Math.abs(now - lastDate) / 36e5;
-        
-        if (diffHours < 24) {
-            // Already trained today, do nothing to streak
-        } else if (diffHours < 48) {
-            employee.streak += 1;
+        if (taskFound) {
+            employee.xp += xpEarned;
+
+            // Check if entire module is completed to subtract 15 Risk
+            let riskReduction = 0;
+            const targetMod = employee.modules.find(m => m.moduleId === moduleId);
+            if (targetMod) {
+                const allCompleted = targetMod.tasks.every(t => t.completed);
+                if (allCompleted) {
+                    riskReduction = 15;
+                    employee.riskScore = Math.max(0, Math.min(100, (employee.riskScore || 0) - riskReduction));
+                }
+            }
+
+            // Re-save (mongoose mixed array element update triggers modified path)
+            employee.markModified('modules');
+            await employee.save();
+
+            res.json({
+                message: "Task completed ✅",
+                xp: employee.xp,
+                xpEarned: xpEarned,
+                modules: employee.modules,
+                riskScore: employee.riskScore
+            });
         } else {
-            employee.streak = 1;
+            res.json({ message: "Task already completed or not found.", xp: employee.xp });
         }
-        
-        employee.lastTrainingDate = now;
-        employee.riskScore = Math.max(0, Math.min(100, employee.riskScore - riskReduction));
 
-        await employee.save();
-
-        res.json({
-            message: "Action recorded ✅",
-            xp: employee.xp,
-            streak: employee.streak,
-            riskScore: employee.riskScore,
-            xpEarned: xpGained
-        });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

@@ -1,0 +1,54 @@
+[
+    {
+        "category": "financial",
+        "title": "Bank Suspicious Transaction",
+        "emailContent": "Verify account at hdfc-secure-account-check.xyz",
+        "question": "What should you do?",
+        "options": [
+            "Click link",
+            "Enter credentials",
+            "Use official banking app",
+            "Send OTP"
+        ],
+        "answer": 2
+    },
+    {
+        "category": "financial",
+        "title": "Fake Credit Card Update",
+        "emailContent": "Enter card details at secure-card-update-hdfc.info",
+        "question": "What is red flag?",
+        "options": [
+            "RBI mention",
+            "Asking card details via link",
+            "Subject",
+            "Card number"
+        ],
+        "answer": 1
+    },
+    {
+        "category": "financial",
+        "title": "Fake Loan Approval",
+        "emailContent": "Pay ₹2000 to activate loan",
+        "question": "What type of scam?",
+        "options": [
+            "Credential phishing",
+            "Advance fee scam",
+            "Malware",
+            "Tech scam"
+        ],
+        "answer": 1
+    },
+    {
+        "category": "financial",
+        "title": "Crypto Investment Scam",
+        "emailContent": "Invest ₹20k get ₹2L guaranteed",
+        "question": "What is red flag?",
+        "options": [
+            "Crypto mention",
+            "Guaranteed profit",
+            "Email",
+            "Investment"
+        ],
+        "answer": 1
+    }
+]

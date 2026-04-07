@@ -1,0 +1,242 @@
+[
+    {
+        "category": "financial",
+        "question": "What is the biggest warning sign?",
+        "scenario": "Bank alert asking to verify account via external link secure-hdfc-verification.net",
+        "options": [
+            "Suspicious transaction mentioned",
+            "External link not official bank domain",
+            "Email greeting",
+            "Transaction amount"
+        ],
+        "answer": 1
+    },
+    {
+        "category": "financial",
+        "question": "What should you do?",
+        "scenario": "UPI blocked message with bit.ly link",
+        "options": [
+            "Click link immediately",
+            "Verify via official SBI app",
+            "Enter UPI PIN",
+            "Share message"
+        ],
+        "answer": 1
+    },
+    {
+        "category": "financial",
+        "question": "What indicates phishing?",
+        "scenario": "Tax refund email asking card details and OTP",
+        "options": [
+            "Tax refund",
+            "Request for card details and OTP",
+            "Official tone",
+            "Refund amount"
+        ],
+        "answer": 1
+    },
+    {
+        "category": "financial",
+        "question": "Which phishing tactic is used?",
+        "scenario": "Card suspension in 12 hours unless details confirmed",
+        "options": [
+            "Friendly reminder",
+            "Urgency and fear",
+            "Marketing",
+            "Account update"
+        ],
+        "answer": 1
+    },
+    {
+        "category": "financial",
+        "question": "What should you do?",
+        "scenario": "Amazon refund failed asking card details",
+        "options": [
+            "Enter details",
+            "Check official Amazon app",
+            "Reply email",
+            "Share card"
+        ],
+        "answer": 1
+    },
+    {
+        "category": "financial",
+        "question": "What is the biggest red flag?",
+        "scenario": "Bitcoin investment promising guaranteed profit",
+        "options": [
+            "Crypto investment",
+            "Guaranteed high profit",
+            "Promotion email",
+            "Bitcoin mention"
+        ],
+        "answer": 1
+    },
+    {
+        "category": "financial",
+        "question": "Why is this suspicious?",
+        "scenario": "SMS asking for ATM PIN",
+        "options": [
+            "RBI rules",
+            "Banks never ask for PIN",
+            "Card updates",
+            "Bank name"
+        ],
+        "answer": 1
+    },
+    {
+        "category": "financial",
+        "question": "What type of fraud is this?",
+        "scenario": "Loan approved but requires ₹2500 fee",
+        "options": [
+            "Credential phishing",
+            "Advance fee scam",
+            "Malware",
+            "Tech scam"
+        ],
+        "answer": 1
+    },
+    {
+        "category": "financial",
+        "question": "What is the biggest warning sign?",
+        "scenario": "Paytm asking password and OTP",
+        "options": [
+            "Security alert",
+            "Asking password and OTP",
+            "Login activity",
+            "Brand name"
+        ],
+        "answer": 1
+    },
+    {
+        "category": "financial",
+        "question": "What phishing tactic is used?",
+        "scenario": "₹2000 cashback asking card details",
+        "options": [
+            "Fear",
+            "Reward lure",
+            "Security",
+            "Update"
+        ],
+        "answer": 1
+    },
+    {
+        "category": "financial",
+        "question": "What indicates phishing?",
+        "scenario": "secure-icici-login-account.info link",
+        "options": [
+            "Bank name",
+            "Fake domain",
+            "HTTPS",
+            "Login page"
+        ],
+        "answer": 1
+    },
+    {
+        "category": "financial",
+        "question": "What should you do?",
+        "scenario": "Google Pay asking UPI PIN verification",
+        "options": [
+            "Enter details",
+            "Verify via official app",
+            "Reply",
+            "Click link"
+        ],
+        "answer": 1
+    },
+    {
+        "category": "financial",
+        "question": "Why is this suspicious?",
+        "scenario": "Mutual fund guaranteed high returns",
+        "options": [
+            "Funds exist",
+            "Guaranteed returns",
+            "Email",
+            "Offer"
+        ],
+        "answer": 1
+    },
+    {
+        "category": "financial",
+        "question": "What type of phishing is this?",
+        "scenario": "Bank maintenance asking username/password",
+        "options": [
+            "Credential harvesting",
+            "Marketing",
+            "Survey",
+            "Policy"
+        ],
+        "answer": 0
+    },
+    {
+        "category": "financial",
+        "question": "What is the biggest red flag?",
+        "scenario": "Insurance payout asking login credentials",
+        "options": [
+            "Insurance claim",
+            "Asking credentials",
+            "Payment",
+            "Official tone"
+        ],
+        "answer": 1
+    },
+    {
+        "category": "financial",
+        "question": "What is the safest action?",
+        "scenario": "Electricity bill payment failure asking card details",
+        "options": [
+            "Enter details",
+            "Pay via official website",
+            "Reply",
+            "Share card"
+        ],
+        "answer": 1
+    },
+    {
+        "category": "financial",
+        "question": "What type of scam is this?",
+        "scenario": "Send Bitcoin and receive double back",
+        "options": [
+            "Investment scam",
+            "Crypto doubling scam",
+            "Bank phishing",
+            "Tech scam"
+        ],
+        "answer": 1
+    },
+    {
+        "category": "financial",
+        "question": "What is suspicious?",
+        "scenario": "PhonePe asking UPI PIN",
+        "options": [
+            "Wallet update",
+            "Asking UPI PIN",
+            "Brand name",
+            "Warning"
+        ],
+        "answer": 1
+    },
+    {
+        "category": "financial",
+        "question": "What phishing tactic is used?",
+        "scenario": "Donation request asking credit card details",
+        "options": [
+            "Emotional manipulation",
+            "Security alert",
+            "Investment",
+            "Marketing"
+        ],
+        "answer": 0
+    },
+    {
+        "category": "financial",
+        "question": "What should you do?",
+        "scenario": "RBI KYC update asking card, PIN, OTP",
+        "options": [
+            "Enter details",
+            "Contact bank officially",
+            "Reply",
+            "Share OTP"
+        ],
+        "answer": 1
+    }
+]

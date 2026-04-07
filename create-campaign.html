@@ -247,33 +247,46 @@
                         <label class="label" for="template">Select Template</label>
                         <select class="select" id="template" required>
                             <option value="">Choose a template</option>
-                            <option>Invoice Payment Reminder</option>
-                            <option>Password Expiry Notice</option>
-                            <option>Package Delivery Alert</option>
-                            <option>Urgent HR Policy Update</option>
-                            <option>Custom Template (Draft)</option>
-                            <option>Salary Credit Issue</option>
-                            <option>Reimbursement Approval Required</option>
-                            <option>Tax Document Submission</option>
-                            <option>Bank Account Verification</option>
-                            <option>Unexpected Bonus Notification</option>
-                            <option>Unusual Login Attempt</option>
-                            <option>Account Locked - Immediate Action</option>
-                            <option>Courier Delivery Failed</option>
-                            <option>Package Held at Customs</option>
-                            <option>Shipment Tracking Update</option>
-                            <option>Delivery Address Confirmation</option>
-                            <option>HR Document Submission</option>
-                            <option>Leave Approval Update</option>
-                            <option>Policy Violation Notice</option>
-                            <option>Shared Google Drive Document</option>
-                            <option>Confidential File Access</option>
-                            <option>Updated Contract Document</option>
-                            <option>Invoice Attachment Download</option>
-                            <option>Gift Card Purchase Request</option>
-                            <option>Email Storage Full Warning</option>
-                            <option>Cloud Storage Expiry Notice</option>
-                            <option>Single Sign-On (SSO) Expiry</option>
+
+                            <!-- 📧 Email Scrutiny Phishing -->
+                            <optgroup label="Email Scrutiny Phishing">
+                                <option>Password Expiry Notice</option>
+                                <option>Unusual Login Attempt</option>
+                                <option>Account Locked - Immediate Action</option>
+                                <option>Email Storage Full Warning</option>
+                                <option>Cloud Storage Expiry Notice</option>
+                                <option>Single Sign-On (SSO) Expiry</option>
+                                <option>Shared Google Drive Document</option>
+                                <option>Confidential File Access</option>
+                                <option>Updated Contract Document</option>
+                                <option>Invoice Attachment Download</option>
+                                <option>Policy Violation Notice</option>
+                            </optgroup>
+
+                            <!-- 💰 Financial Phishing -->
+                            <optgroup label="Financial Phishing">
+                                <option>Invoice Payment Reminder</option>
+                                <option>Salary Credit Issue</option>
+                                <option>Reimbursement Approval Required</option>
+                                <option>Tax Document Submission</option>
+                                <option>Bank Account Verification</option>
+                                <option>Unexpected Bonus Notification</option>
+                                <option>Gift Card Purchase Request</option>
+                            </optgroup>
+
+                            <!-- 🧠 Social Frauds -->
+                            <optgroup label="Social Frauds">
+                                <option>Urgent HR Policy Update</option>
+                                <option>HR Document Submission</option>
+                                <option>Leave Approval Update</option>
+                                <option>Package Delivery Alert</option>
+                                <option>Courier Delivery Failed</option>
+                                <option>Package Held at Customs</option>
+                                <option>Shipment Tracking Update</option>
+                                <option>Delivery Address Confirmation</option>
+                                <option>Custom Template (Draft)</option>
+                            </optgroup>
+
                         </select>
                     </div>
 
@@ -340,10 +353,10 @@
         deptSelect.disabled = true;
 
         sendRadios.forEach(radio => {
-            radio.addEventListener("change", function() {
+            radio.addEventListener("change", function () {
                 if (this.value === "all") {
                     deptSelect.disabled = true;
-                    deptSelect.value = ""; 
+                    deptSelect.value = "";
                 } else {
                     deptSelect.disabled = false;
                 }

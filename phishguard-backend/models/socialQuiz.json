@@ -1,0 +1,242 @@
+[
+    {
+        "category": "social",
+        "question": "What is the biggest warning sign?",
+        "scenario": "Instagram account violation notice with threat to disable account in 24 hours.",
+        "options": [
+            "Mention of guidelines",
+            "Urgent threat to disable account",
+            "Email from Instagram",
+            "Verification link"
+        ],
+        "answer": 1
+    },
+    {
+        "category": "social",
+        "question": "What indicates phishing?",
+        "scenario": "Sender: facebook-support-helpdesk@gmail.com",
+        "options": [
+            "Facebook contacting users",
+            "Gmail address instead of official domain",
+            "Support message",
+            "Help instructions"
+        ],
+        "answer": 1
+    },
+    {
+        "category": "social",
+        "question": "What tactic is being used?",
+        "scenario": "TikTok copyright violation warning with legal threat",
+        "options": [
+            "Reward incentive",
+            "Fear and legal threat",
+            "Marketing promotion",
+            "Account upgrade"
+        ],
+        "answer": 1
+    },
+    {
+        "category": "social",
+        "question": "What should you do?",
+        "scenario": "Instagram blue tick verification email",
+        "options": [
+            "Log in immediately",
+            "Enter credentials",
+            "Check official website",
+            "Send password"
+        ],
+        "answer": 2
+    },
+    {
+        "category": "social",
+        "question": "What is the red flag?",
+        "scenario": "instagram-support-verify-account.xyz",
+        "options": [
+            "Word verify",
+            "Fake domain",
+            "Support message",
+            "Contains Instagram"
+        ],
+        "answer": 1
+    },
+    {
+        "category": "social",
+        "question": "What should you do?",
+        "scenario": "LinkedIn unusual login email",
+        "options": [
+            "Enter password via email link",
+            "Login via official app",
+            "Reply email",
+            "Ignore warning"
+        ],
+        "answer": 1
+    },
+    {
+        "category": "social",
+        "question": "Which phishing technique is used?",
+        "scenario": "Facebook page deletion warning in 12 hours",
+        "options": [
+            "Urgency and pressure",
+            "Friendly reminder",
+            "Marketing",
+            "Newsletter"
+        ],
+        "answer": 0
+    },
+    {
+        "category": "social",
+        "question": "Why is this dangerous?",
+        "scenario": "DM: Is this you in this video? (link)",
+        "options": [
+            "Malware/phishing link",
+            "Friendly message",
+            "Normal feature",
+            "Notification"
+        ],
+        "answer": 0
+    },
+    {
+        "category": "social",
+        "question": "What does this indicate?",
+        "scenario": "Google Form asking username, password, recovery email",
+        "options": [
+            "Normal support",
+            "Credential phishing",
+            "Survey",
+            "Feedback form"
+        ],
+        "answer": 1
+    },
+    {
+        "category": "social",
+        "question": "What should you do first?",
+        "scenario": "YouTube copyright appeal email",
+        "options": [
+            "Click link",
+            "Check official site",
+            "Reply password",
+            "Share"
+        ],
+        "answer": 1
+    },
+    {
+        "category": "social",
+        "question": "What is the biggest warning sign?",
+        "scenario": "Email asking for login credentials to restore account",
+        "options": [
+            "Email from support",
+            "Asking for credentials",
+            "Account access message",
+            "Security mention"
+        ],
+        "answer": 1
+    },
+    {
+        "category": "social",
+        "question": "What type of phishing is this?",
+        "scenario": "Get 10,000 followers instantly login promotion",
+        "options": [
+            "Credential harvesting",
+            "Verification",
+            "Update",
+            "Support"
+        ],
+        "answer": 0
+    },
+    {
+        "category": "social",
+        "question": "Why is this suspicious?",
+        "scenario": "Twitter policy update login via external link",
+        "options": [
+            "Policy updates exist",
+            "External login link",
+            "Account access",
+            "Instructions"
+        ],
+        "answer": 1
+    },
+    {
+        "category": "social",
+        "question": "What phishing tactic is used?",
+        "scenario": "Win MacBook Pro giveaway",
+        "options": [
+            "Fear",
+            "Reward lure",
+            "Technical update",
+            "Security alert"
+        ],
+        "answer": 1
+    },
+    {
+        "category": "social",
+        "question": "What should you do?",
+        "scenario": "Account recovery email asking password",
+        "options": [
+            "Enter password",
+            "Check official app",
+            "Reply",
+            "Share"
+        ],
+        "answer": 1
+    },
+    {
+        "category": "social",
+        "question": "What should you check first?",
+        "scenario": "Fake Instagram login page",
+        "options": [
+            "Page color",
+            "Website URL",
+            "Logo",
+            "Font"
+        ],
+        "answer": 1
+    },
+    {
+        "category": "social",
+        "question": "What type of phishing is this?",
+        "scenario": "Verification DM asking login details",
+        "options": [
+            "Credential theft",
+            "Marketing",
+            "Recovery",
+            "Update"
+        ],
+        "answer": 0
+    },
+    {
+        "category": "social",
+        "question": "What is suspicious?",
+        "scenario": "facebook-login-security-check.ru",
+        "options": [
+            "Design",
+            "Fake domain",
+            "Color",
+            "Content"
+        ],
+        "answer": 1
+    },
+    {
+        "category": "social",
+        "question": "What should you do?",
+        "scenario": "Nike collaboration login request",
+        "options": [
+            "Enter details",
+            "Verify officially",
+            "Accept",
+            "Share password"
+        ],
+        "answer": 1
+    },
+    {
+        "category": "social",
+        "question": "What does this indicate?",
+        "scenario": "Form asking username, password, recovery email",
+        "options": [
+            "Official appeal",
+            "Credential phishing",
+            "Survey",
+            "Update"
+        ],
+        "answer": 1
+    }
+]

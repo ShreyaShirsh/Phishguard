@@ -1,0 +1,54 @@
+[
+    {
+        "category": "social",
+        "title": "Instagram Violation",
+        "emailContent": "Verify account at instagram-support-verification.net",
+        "question": "What should you do?",
+        "options": [
+            "Click link",
+            "Enter password",
+            "Login via official app",
+            "Send credentials"
+        ],
+        "answer": 2
+    },
+    {
+        "category": "social",
+        "title": "Facebook Suspension",
+        "emailContent": "Confirm identity at facebook-security-verification.xyz",
+        "question": "What tactic is used?",
+        "options": [
+            "Fear and urgency",
+            "Marketing",
+            "Newsletter",
+            "Survey"
+        ],
+        "answer": 0
+    },
+    {
+        "category": "social",
+        "title": "Fake Collaboration",
+        "emailContent": "Login at nike-instagram-collab.com",
+        "question": "What should you do?",
+        "options": [
+            "Enter login",
+            "Verify officially",
+            "Send password",
+            "Accept"
+        ],
+        "answer": 1
+    },
+    {
+        "category": "social",
+        "title": "YouTube Strike",
+        "emailContent": "Verify account at youtube-security-check.xyz",
+        "question": "What should you do?",
+        "options": [
+            "Click link",
+            "Enter password",
+            "Login via official site",
+            "Send OTP"
+        ],
+        "answer": 2
+    }
+]

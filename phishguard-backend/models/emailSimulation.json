@@ -1,0 +1,54 @@
+[
+    {
+        "category": "email",
+        "title": "Fake Internship Offer",
+        "emailContent": "Submit Aadhaar and bank details at amazon-careers-internship-verification.xyz",
+        "question": "What should you do?",
+        "options": [
+            "Submit documents",
+            "Click link",
+            "Verify through official website",
+            "Send bank details"
+        ],
+        "answer": 2
+    },
+    {
+        "category": "email",
+        "title": "Fake Microsoft Job Offer",
+        "emailContent": "Download OfferLetter.exe and send personal details",
+        "question": "What is the red flag?",
+        "options": [
+            "Job offer email",
+            "Executable attachment (.exe)",
+            "HR mention",
+            "Job role"
+        ],
+        "answer": 1
+    },
+    {
+        "category": "email",
+        "title": "Fake Company IT Email",
+        "emailContent": "Verify credentials at company-mail-verification.info",
+        "question": "What is safest action?",
+        "options": [
+            "Enter login",
+            "Contact IT directly",
+            "Click link",
+            "Send password"
+        ],
+        "answer": 1
+    },
+    {
+        "category": "email",
+        "title": "CEO Gift Card Scam",
+        "emailContent": "Buy gift cards worth ₹10,000 urgently",
+        "question": "What should you do?",
+        "options": [
+            "Buy immediately",
+            "Send codes",
+            "Verify with manager",
+            "Forward mail"
+        ],
+        "answer": 2
+    }
+]
