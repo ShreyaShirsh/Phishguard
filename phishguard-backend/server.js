@@ -64,7 +64,7 @@ app.get("/", (req, res) => {
 app.post("/register", async (req, res) => {
     try {
         const { name, email, password, role, department } = req.body;
-        
+
         // Strict Form Validation
         const nameRegex = /^[A-Za-z\s]+$/;
         if (!nameRegex.test(name)) {
@@ -75,7 +75,7 @@ app.post("/register", async (req, res) => {
         if (!emailRegex.test(email)) {
             return res.status(400).json({ error: "Invalid email domain. Please use a valid top-level domain like .com or .org ❌" });
         }
-        
+
         const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = new User({
             name, email, role, department, password: hashedPassword
@@ -157,7 +157,6 @@ app.post("/campaign", verifyToken, async (req, res) => {
     }
 });
 
-// 🔥 NEW API
 app.get("/campaigns", verifyToken, async (req, res) => {
     try {
         const campaigns = await Campaign.find();
@@ -184,7 +183,7 @@ app.get("/api/simulation/:category", verifyToken, async (req, res) => {
             "financial": "financial"
         };
         const mappedCat = categoryMap[req.params.category] || req.params.category;
-        
+
         const data = await Simulation.aggregate([
             { $match: { category: mappedCat } },
             { $sample: { size: 3 } }
@@ -199,20 +198,20 @@ app.get("/api/simulation/:category", verifyToken, async (req, res) => {
 app.delete("/campaign/:id", verifyToken, async (req, res) => {
     try {
         if (req.user.role !== "admin") return res.status(403).json({ error: "Access Denied: Admin Only ❌" });
-        
+
         const campaign = await Campaign.findById(req.params.id);
         if (campaign) {
             // Reverse targeting: Lock modules for targeted users
             const query = { role: "employee" };
             if (campaign.department !== "All" && campaign.department) query.department = campaign.department;
-            
+
             const categoryMapping = {
                 "Email Scrutiny Phishing": "email_phishing",
                 "Financial Phishing": "financial",
                 "Social Frauds": "social_media"
             };
             const activeModId = categoryMapping[campaign.template] || campaign.template;
-            
+
             if (activeModId) {
                 await User.updateMany(
                     query,
@@ -220,7 +219,7 @@ app.delete("/campaign/:id", verifyToken, async (req, res) => {
                     { arrayFilters: [{ "elem.moduleId": activeModId }] }
                 );
             }
-            
+
             await Campaign.findByIdAndDelete(req.params.id);
             return res.json({ message: "Campaign Terminated and Modules Locked ✅" });
         }
@@ -230,7 +229,7 @@ app.delete("/campaign/:id", verifyToken, async (req, res) => {
     }
 });
 
-// 🔥 REAL TIME STATS API
+//  REAL TIME STATS API
 app.get("/stats", verifyToken, async (req, res) => {
     try {
         if (req.user.role !== "admin") return res.status(403).json({ error: "Access Denied: Admin Only ❌" });
@@ -331,7 +330,7 @@ app.get("/stats", verifyToken, async (req, res) => {
     }
 });
 
-// 🔥 FETCH EMPLOYEES
+// FETCH EMPLOYEES
 app.get("/employees", verifyToken, async (req, res) => {
     try {
         if (req.user.role !== "admin") return res.status(403).json({ error: "Access Denied: Admin Only ❌" });
@@ -344,7 +343,7 @@ app.get("/employees", verifyToken, async (req, res) => {
     }
 });
 
-// 🔥 FETCH SINGLE EMPLOYEE BY EMAIL
+//  FETCH SINGLE EMPLOYEE BY EMAIL
 app.get("/employee/:email", verifyToken, async (req, res) => {
     try {
         if (req.user.role !== "admin" && req.user.email !== req.params.email) return res.status(403).json({ error: "Access Denied ❌" });
@@ -369,7 +368,7 @@ app.get("/employee/:email", verifyToken, async (req, res) => {
     }
 });
 
-// 🔥 COMPLETE TRAINING & CALC RISK REDUCTION
+// COMPLETE TRAINING & CALC RISK REDUCTION
 app.post("/employee/:email/complete-training", verifyToken, async (req, res) => {
     try {
         if (req.user.role !== "admin" && req.user.email !== req.params.email) return res.status(403).json({ error: "Access Denied ❌" });
@@ -415,7 +414,7 @@ app.post("/employee/:email/complete-training", verifyToken, async (req, res) => 
     }
 });
 
-// 🔥 GAMIFIED TRAINING COMPLETE (XP & STREAK)
+//  GAMIFIED TRAINING COMPLETE (XP & STREAK)
 app.post("/employee/:email/gamified-complete", verifyToken, async (req, res) => {
     try {
         if (req.user.role !== "admin" && req.user.email !== req.params.email) return res.status(403).json({ error: "Access Denied ❌" });
@@ -478,7 +477,7 @@ app.post("/employee/:email/gamified-complete", verifyToken, async (req, res) => 
 });
 
 
-// 🔥 SIMULATION INBOX ACTIONS
+// SIMULATION INBOX ACTIONS
 app.post("/employee/:email/simulation", verifyToken, async (req, res) => {
     try {
         if (req.user.role !== "admin" && req.user.email !== req.params.email) return res.status(403).json({ error: "Access Denied ❌" });
@@ -546,7 +545,7 @@ app.post("/employee/:email/simulation", verifyToken, async (req, res) => {
     }
 });
 
-// 🔥 ASSIGN TRAINING MODULE TO EMPLOYEE
+// ASSIGN TRAINING MODULE TO EMPLOYEE
 app.post("/admin/assign-training", verifyToken, async (req, res) => {
     try {
         if (req.user.role !== "admin") return res.status(403).json({ error: "Access Denied: Admin Only ❌" });
@@ -572,7 +571,7 @@ app.post("/admin/assign-training", verifyToken, async (req, res) => {
     }
 });
 
-// 🔥 FETCH LEADERBOARD
+// FETCH LEADERBOARD
 app.get("/leaderboard", verifyToken, async (req, res) => {
     try {
         const users = await User.find({ role: "employee" })
@@ -585,7 +584,7 @@ app.get("/leaderboard", verifyToken, async (req, res) => {
     }
 });
 
-// 🔥 FETCH DYNAMIC TRAINING MODULES
+// FETCH DYNAMIC TRAINING MODULES
 app.get("/employee/:email/modules", verifyToken, async (req, res) => {
     try {
         const employee = await User.findOne({ email: req.params.email });
@@ -596,7 +595,7 @@ app.get("/employee/:email/modules", verifyToken, async (req, res) => {
     }
 });
 
-// 🔥 COMPLETE TASK IN MODULE
+//  COMPLETE TASK IN MODULE
 app.post("/employee/:email/complete-task", verifyToken, async (req, res) => {
     try {
         const { moduleId, taskType, earnedXp } = req.body;
@@ -664,7 +663,7 @@ app.post("/employee/:email/complete-task", verifyToken, async (req, res) => {
                     riskReduction = 15;
                 }
             }
-            
+
             employee.riskScore = Math.max(0, Math.min(100, (employee.riskScore || 0) + riskMod - riskReduction));
 
             // Re-save (mongoose mixed array element update triggers modified path)
@@ -687,12 +686,12 @@ app.post("/employee/:email/complete-task", verifyToken, async (req, res) => {
     }
 });
 
-// 🔥 ADMIN: ADD EMPLOYEE MANUALLY
+// ADMIN: ADD EMPLOYEE MANUALLY
 app.post("/admin/employee", verifyToken, async (req, res) => {
     try {
         if (req.user.role !== "admin") return res.status(403).json({ error: "Access Denied ❌" });
         const { name, email, password, department } = req.body;
-        
+
         const nameRegex = /^[A-Za-z\s]+$/;
         if (!nameRegex.test(name)) return res.status(400).json({ error: "Name must contain only letters and spaces ❌" });
 
@@ -710,7 +709,7 @@ app.post("/admin/employee", verifyToken, async (req, res) => {
     }
 });
 
-// 🔥 ADMIN: DELETE EMPLOYEE MANUALLY
+// ADMIN: DELETE EMPLOYEE MANUALLY
 app.delete("/admin/employee/:id", verifyToken, async (req, res) => {
     try {
         if (req.user.role !== "admin") return res.status(403).json({ error: "Access Denied ❌" });
