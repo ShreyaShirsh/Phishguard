@@ -64,6 +64,13 @@ app.get("/", (req, res) => {
 app.post("/register", async (req, res) => {
     try {
         const { name, email, password, role, department } = req.body;
+        
+        // Strict Form Validation
+        const nameRegex = /^[A-Za-z\s]+$/;
+        if (!nameRegex.test(name)) {
+            return res.status(400).json({ error: "Name must contain only letters and spaces ❌" });
+        }
+        
         const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = new User({
             name, email, role, department, password: hashedPassword
@@ -82,7 +89,7 @@ app.post("/login", async (req, res) => {
 
         let validPassword = false;
         // Graceful legacy fallback for plaintext passwords already in DB
-        if (user.password && user.password.startsWith("$2a$")) {
+        if (user.password && user.password.startsWith("$2")) {
             validPassword = await bcrypt.compare(req.body.password, user.password);
         } else {
             validPassword = (user.password === req.body.password);
@@ -106,14 +113,13 @@ app.post("/login", async (req, res) => {
 app.post("/campaign", verifyToken, async (req, res) => {
     try {
         if (req.user.role !== "admin") return res.status(403).json({ error: "Access Denied: Admin Only ❌" });
-        const { campaignName, template, category, department, createdBy } = req.body;
+        const { campaignName, template, category, department, createdBy, moduleCategory } = req.body;
 
-        let targetedEmployees = 0;
-        if (department === "All" || !department) {
-            targetedEmployees = await User.countDocuments({ role: "employee" });
-        } else {
-            targetedEmployees = await User.countDocuments({ role: "employee", department: department });
-        }
+        let filter = { role: "employee" };
+        if (department !== "All" && department) filter.department = department;
+
+        const targetedUsers = await User.find(filter);
+        const targetedEmployees = targetedUsers.length;
 
         const newCampaign = new Campaign({
             campaignName,
@@ -124,6 +130,22 @@ app.post("/campaign", verifyToken, async (req, res) => {
             targetedEmployees
         });
         await newCampaign.save();
+
+        const categoryMapping = {
+            "Email Scrutiny Phishing": "email_phishing",
+            "Financial Phishing": "financial",
+            "Social Frauds": "social_media"
+        };
+        const activeModId = categoryMapping[moduleCategory];
+
+        if (activeModId) {
+            await User.updateMany(
+                filter,
+                { $set: { "modules.$[elem].enabled": true } },
+                { arrayFilters: [{ "elem.moduleId": activeModId }] }
+            );
+        }
+
         res.json({ message: "Campaign Created Successfully ✅" });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -160,7 +182,7 @@ app.get("/api/simulation/:category", verifyToken, async (req, res) => {
         
         const data = await Simulation.aggregate([
             { $match: { category: mappedCat } },
-            { $sample: { size: 1 } }
+            { $sample: { size: 3 } }
         ]);
         res.json(data);
     } catch (err) {

@@ -328,18 +328,33 @@
     </main>
 
     <script>
+        // const videos = {
+        //     email: {
+        //         title: "Email Phishing Awareness",
+        //         url: "https://www.youtube.com/embed/hv9vDrtdQHM"
+        //     },
+        //     social: {
+        //         title: "Social Media Phishing",
+        //         url: "https://www.youtube.com/embed/Rm9d3C9YzaM"
+        //     },
+        //     financial: {
+        //         title: "Financial Scam Awareness",
+        //         url: "https://www.youtube.com/embed/XBkzBrXlle0"
+        //     }
+        // };
+
         const videos = {
             email: {
                 title: "Email Phishing Awareness",
-                url: "https://youtu.be/hv9vDrtdQHM?si=Jw08TuYTsnJMdATR"
+                url: "https://www.youtube.com/embed/a2cTpJa50ic"
             },
             social: {
                 title: "Social Media Phishing",
-                url: "https://youtu.be/Rm9d3C9YzaM?si=J1X0riYXZFlWt-dU"
+                url: "https://www.youtube.com/embed/Y7zNlEMDmI4"
             },
             financial: {
                 title: "Financial Scam Awareness",
-                url: "https://youtu.be/XBkzBrXlle0?si=4k6AGxh6s6YZcE3w"
+                url: "https://www.youtube.com/embed/6G2k7c4R3fM"
             }
         };
 
@@ -415,7 +430,7 @@
                         let onClickAction = `completeTask('${mod.moduleId}', '${task.type}')`;
                         if (task.type === 'video') onClickAction = `openVideo('${mod.moduleId.split('_')[0]}', '${mod.moduleId}', '${task.type}')`;
                         if (task.type === 'quiz') onClickAction = `openQuiz('${mod.moduleId.split('_')[0]}', '${mod.moduleId}', '${task.type}')`;
-                        if (task.type === 'simulation') onClickAction = `openSimulation('${mod.moduleId}', '${task.type}')`;
+                        if (task.type === 'simulation') onClickAction = `openSimulation('${mod.moduleId.split('_')[0]}', '${mod.moduleId}', '${task.type}')`;
 
                         tasksHTML += `
                             <div class="task-row ${isDone ? 'completed' : ''}">
@@ -484,34 +499,60 @@
         }
 
         /* --- SIMULATION LOGIC --- */
+        let currentSimQuestions = [];
+        let currentSimIndex = 0;
+        let currentSimScore = 0;
+
         async function openSimulation(category, moduleId, taskType) {
             const token = localStorage.getItem('phishguard_token');
             const res = await fetch(`http://localhost:5000/api/simulation/${category}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const sims = await res.json();
-            
+
             if (!sims || sims.length === 0) {
                 alert("No simulations found for this category! Contact Admin.");
                 return;
             }
 
-            const sim = sims[0]; 
+            currentSimQuestions = sims;
+            currentSimIndex = 0;
+            currentSimScore = 0;
+            renderSimStep(moduleId, taskType);
+        }
 
+        function renderSimStep(moduleId, taskType) {
             const container = document.getElementById("modulesContainer");
+            
+            if (currentSimIndex >= currentSimQuestions.length) {
+                let percent = (currentSimScore / currentSimQuestions.length) * 100;
+                let earnedXp = 20;
+                if (percent >= 80) earnedXp = 100;
+                else if (percent >= 50) earnedXp = 50;
+
+                container.innerHTML = `
+                <div style="background:#111; padding:30px; border-radius:10px; text-align: center;">
+                    <h2>Simulation Sandbox Completed!</h2>
+                    <p style="font-size: 1.2rem; margin: 15px 0;">You successfully mitigated ${currentSimScore} out of ${currentSimQuestions.length} threats (${Math.round(percent)}%).</p>
+                    <p style="color: var(--cyber-green); margin-bottom: 20px; font-weight: bold; font-size: 1.1rem;">You earned +${earnedXp} XP!</p>
+                    <button class="btn-start" onclick="completeTask('${moduleId}', '${taskType}', ${earnedXp})">Finish & Save</button>
+                </div>`;
+                return;
+            }
+            
+            const sim = currentSimQuestions[currentSimIndex];
 
             container.innerHTML = `
-        <div style="background:#111; padding:20px; border-radius:10px;">
-            <h3 style="color: var(--cyber-yellow); margin-bottom: 10px; font-family:'Orbitron', sans-serif;">Simulation Sandbox</h3>
-            <h2 style="margin-bottom: 20px;">${sim.title}</h2>
-            <div style="padding: 15px; margin: 15px 0; background: rgba(0, 217, 255, 0.1); border-left: 4px solid var(--cyber-blue); line-height: 1.6; font-style: italic;">
-                "${sim.emailContent}"
-            </div>
-            <h3 style="margin-bottom: 15px;">${sim.question}</h3>
-            <div id="options"></div>
-            <br><button onclick="loadModules()">⬅ Exit Early</button>
-        </div>
-    `;
+            <div style="background:#111; padding:20px; border-radius:10px;">
+                <h3 style="color: var(--cyber-yellow); margin-bottom: 10px; font-family:'Orbitron', sans-serif;">Simulation Sandbox (${currentSimIndex + 1}/${currentSimQuestions.length})</h3>
+                <h2 style="margin-bottom: 20px;">${sim.title}</h2>
+                <div style="padding: 15px; margin: 15px 0; background: rgba(0, 217, 255, 0.1); border-left: 4px solid var(--cyber-blue); line-height: 1.6; font-style: italic;">
+                    "${sim.emailContent}"
+                </div>
+                <h3 style="margin-bottom: 15px;">${sim.question}</h3>
+                <div id="options"></div>
+                <br><button onclick="loadModules()">⬅ Exit Early</button>
+            </div>`;
 
             const optionsDiv = document.getElementById("options");
 
@@ -519,40 +560,37 @@
                 const btn = document.createElement("button");
                 btn.innerText = opt;
                 btn.style.cssText = "display:block; width:100%; text-align:left; margin-bottom: 10px; padding: 12px; background: rgba(0, 217, 255, 0.05); border: 1px solid var(--cyber-blue); color: #fff; cursor: pointer; border-radius: 6px; transition: 0.2s;";
-                btn.onmouseover = () => { btn.style.background='var(--cyber-blue)'; btn.style.color='#000'; };
-                btn.onmouseout = () => { btn.style.background='rgba(0, 217, 255, 0.05)'; btn.style.color='#fff'; };
+                btn.onmouseover = () => { btn.style.background = 'var(--cyber-blue)'; btn.style.color = '#000'; };
+                btn.onmouseout = () => { btn.style.background = 'rgba(0, 217, 255, 0.05)'; btn.style.color = '#fff'; };
                 btn.onclick = () => checkSimulationAnswer(index, sim.answer, moduleId, taskType);
 
                 optionsDiv.appendChild(btn);
             });
         }
-        
+
         function checkSimulationAnswer(selectedIndex, correctIndex, moduleId, taskType) {
             const container = document.getElementById("modulesContainer");
-            
-            let earnedXp = 0;
+
             let resultMessage = "";
             let color = "";
             let resultTitle = "";
-            
+
             if (selectedIndex === correctIndex) {
-                earnedXp = 100;
+                currentSimScore++;
                 resultTitle = "Correct! 🛡️";
                 resultMessage = "Great job identifying the red flags. You successfully mitigated the phishing attempt.";
                 color = "var(--cyber-green)";
             } else {
-                earnedXp = 0;
                 resultTitle = "Compromised! ❌";
                 resultMessage = "You fell for the simulation. Always verify links and urgent requests before acting.";
                 color = "var(--cyber-red)";
             }
-            
+
             container.innerHTML = `
             <div style="background:#111; padding:30px; border-radius:10px; text-align: center;">
                 <h2 style="color: ${color}">${resultTitle}</h2>
-                <p style="font-size: 1.1rem; margin: 15px 0;">${resultMessage}</p>
-                <p style="color: var(--cyber-green); margin-bottom: 20px; font-weight: bold; font-size: 1.1rem;">You earned +${earnedXp} XP!</p>
-                <button class="btn-start" onclick="completeTask('${moduleId}', '${taskType}', ${earnedXp})">Finish & Save</button>
+                <p style="margin: 20px 0; font-size: 1.1rem; line-height: 1.5;">${resultMessage}</p>
+                <button class="btn-start" onclick="currentSimIndex++; renderSimStep('${moduleId}', '${taskType}')">Next Scenario ➡</button>
             </div>`;
         }
 

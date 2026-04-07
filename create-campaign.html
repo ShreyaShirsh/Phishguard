@@ -244,48 +244,12 @@
                     </div>
 
                     <div class="field">
-                        <label class="label" for="template">Select Template</label>
+                        <label class="label" for="template">Select Module</label>
                         <select class="select" id="template" required>
-                            <option value="">Choose a template</option>
-
-                            <!-- 📧 Email Scrutiny Phishing -->
-                            <optgroup label="Email Scrutiny Phishing">
-                                <option>Password Expiry Notice</option>
-                                <option>Unusual Login Attempt</option>
-                                <option>Account Locked - Immediate Action</option>
-                                <option>Email Storage Full Warning</option>
-                                <option>Cloud Storage Expiry Notice</option>
-                                <option>Single Sign-On (SSO) Expiry</option>
-                                <option>Shared Google Drive Document</option>
-                                <option>Confidential File Access</option>
-                                <option>Updated Contract Document</option>
-                                <option>Invoice Attachment Download</option>
-                                <option>Policy Violation Notice</option>
-                            </optgroup>
-
-                            <!-- 💰 Financial Phishing -->
-                            <optgroup label="Financial Phishing">
-                                <option>Invoice Payment Reminder</option>
-                                <option>Salary Credit Issue</option>
-                                <option>Reimbursement Approval Required</option>
-                                <option>Tax Document Submission</option>
-                                <option>Bank Account Verification</option>
-                                <option>Unexpected Bonus Notification</option>
-                                <option>Gift Card Purchase Request</option>
-                            </optgroup>
-
-                            <!-- 🧠 Social Frauds -->
-                            <optgroup label="Social Frauds">
-                                <option>Urgent HR Policy Update</option>
-                                <option>HR Document Submission</option>
-                                <option>Leave Approval Update</option>
-                                <option>Package Delivery Alert</option>
-                                <option>Courier Delivery Failed</option>
-                                <option>Package Held at Customs</option>
-                                <option>Shipment Tracking Update</option>
-                                <option>Delivery Address Confirmation</option>
-                                <option>Custom Template (Draft)</option>
-                            </optgroup>
+                            <option value="">Choose a module</option>
+                            <option>Email Scrutiny Phishing</option>
+                            <option>Financial Phishing</option>
+                            <option>Social Frauds</option>
 
                         </select>
                     </div>
@@ -295,11 +259,8 @@
                         <select class="select" id="category" required>
                             <option value="">Select category</option>
                             <option value="Financial">Financial</option>
-                            <option value="Security">Security</option>
-                            <option value="Delivery">Delivery</option>
-                            <option value="HR">HR</option>
-                            <option value="Cloud">Cloud</option>
-                            <option value="General">General</option>
+                            <option value="Email">Email</option>
+                            <option value="Social">Social</option>
                         </select>
                     </div>
 
@@ -367,9 +328,13 @@
             e.preventDefault();
 
             const campaignName = document.getElementById("campaignName").value;
-            const template = document.getElementById("template").value;
+            const templateSelect = document.getElementById("template");
+            const template = templateSelect.value;
             const category = document.getElementById("category").value;
             let department = document.getElementById("department").value;
+
+            const selectedOpt = templateSelect.options[templateSelect.selectedIndex];
+            const moduleCategory = template;
 
             const sendToAll = document.querySelector('input[name="sendTo"]:checked').value === "all";
             if (sendToAll) {
@@ -378,8 +343,6 @@
                 alert("Please select a specific department ❌");
                 return;
             }
-
-
 
             try {
                 const res = await fetch("http://localhost:5000/campaign", {
@@ -392,6 +355,7 @@
                         campaignName,
                         template,
                         category,
+                        moduleCategory,
                         department,
                         createdBy: user.email
                     })
