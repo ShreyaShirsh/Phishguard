@@ -70,6 +70,11 @@ app.post("/register", async (req, res) => {
         if (!nameRegex.test(name)) {
             return res.status(400).json({ error: "Name must contain only letters and spaces ❌" });
         }
+
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.(com|org|net|edu|gov|in|io)$/;
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({ error: "Invalid email domain. Please use a valid top-level domain like .com or .org ❌" });
+        }
         
         const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = new User({
@@ -596,6 +601,36 @@ app.post("/employee/:email/complete-task", verifyToken, async (req, res) => {
         if (taskFound) {
             employee.xp += xpEarned;
 
+            // Streak Logic Calculation
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+
+            let lastDate = 0;
+            if (employee.lastTrainingDate) {
+                const ld = new Date(employee.lastTrainingDate);
+                lastDate = new Date(ld.getFullYear(), ld.getMonth(), ld.getDate()).getTime();
+            }
+
+            const msInDay = 86400000;
+            const diffDays = Math.round((today - lastDate) / msInDay);
+
+            if (diffDays === 1) {
+                employee.streak = (employee.streak || 0) + 1;
+            } else if (diffDays > 1) {
+                employee.streak = 1; // Streak broken, restart
+            } else if (diffDays === 0 && !employee.streak) {
+                employee.streak = 1; // First training ever for the day
+            }
+            employee.lastTrainingDate = now;
+
+            // Dynamic Risk Tracking
+            let riskMod = 0;
+            if (taskType === 'simulation' && xpEarned === 0) {
+                riskMod = 5; // Penalty for failing a simulation completely
+            } else if (xpEarned > 0) {
+                riskMod = -Math.floor(xpEarned / 20); // Minor reduction for successfully completing tasks
+            }
+
             // Check if entire module is completed to subtract 15 Risk
             let riskReduction = 0;
             const targetMod = employee.modules.find(m => m.moduleId === moduleId);
@@ -603,9 +638,10 @@ app.post("/employee/:email/complete-task", verifyToken, async (req, res) => {
                 const allCompleted = targetMod.tasks.every(t => t.completed);
                 if (allCompleted) {
                     riskReduction = 15;
-                    employee.riskScore = Math.max(0, Math.min(100, (employee.riskScore || 0) - riskReduction));
                 }
             }
+            
+            employee.riskScore = Math.max(0, Math.min(100, (employee.riskScore || 0) + riskMod - riskReduction));
 
             // Re-save (mongoose mixed array element update triggers modified path)
             employee.markModified('modules');
@@ -622,6 +658,40 @@ app.post("/employee/:email/complete-task", verifyToken, async (req, res) => {
             res.json({ message: "Task already completed or not found.", xp: employee.xp });
         }
 
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// 🔥 ADMIN: ADD EMPLOYEE MANUALLY
+app.post("/admin/employee", verifyToken, async (req, res) => {
+    try {
+        if (req.user.role !== "admin") return res.status(403).json({ error: "Access Denied ❌" });
+        const { name, email, password, department } = req.body;
+        
+        const nameRegex = /^[A-Za-z\s]+$/;
+        if (!nameRegex.test(name)) return res.status(400).json({ error: "Name must contain only letters and spaces ❌" });
+
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.(com|org|net|edu|gov|in|io)$/;
+        if (!emailRegex.test(email)) return res.status(400).json({ error: "Invalid email domain. Please use a valid top-level domain ❌" });
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const newUser = new User({
+            name, email, role: "employee", department, password: hashedPassword
+        });
+        await newUser.save();
+        res.json({ message: "Employee Created Successfully ✅" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// 🔥 ADMIN: DELETE EMPLOYEE MANUALLY
+app.delete("/admin/employee/:id", verifyToken, async (req, res) => {
+    try {
+        if (req.user.role !== "admin") return res.status(403).json({ error: "Access Denied ❌" });
+        await User.findByIdAndDelete(req.params.id);
+        res.json({ message: "Employee Deleted Successfully ✅" });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
