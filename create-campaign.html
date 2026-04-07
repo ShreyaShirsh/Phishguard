@@ -278,6 +278,19 @@
                     </div>
 
                     <div class="field">
+                        <label class="label" for="category">Category</label>
+                        <select class="select" id="category" required>
+                            <option value="">Select category</option>
+                            <option value="Financial">Financial</option>
+                            <option value="Security">Security</option>
+                            <option value="Delivery">Delivery</option>
+                            <option value="HR">HR</option>
+                            <option value="Cloud">Cloud</option>
+                            <option value="General">General</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
                         <label class="label" for="department">Department (if needed)</label>
                         <select class="select" id="department">
                             <option value="">Select department</option>
@@ -342,6 +355,7 @@
 
             const campaignName = document.getElementById("campaignName").value;
             const template = document.getElementById("template").value;
+            const category = document.getElementById("category").value;
             let department = document.getElementById("department").value;
 
             const sendToAll = document.querySelector('input[name="sendTo"]:checked').value === "all";
@@ -364,6 +378,7 @@
                     body: JSON.stringify({
                         campaignName,
                         template,
+                        category,
                         department,
                         createdBy: user.email
                     })

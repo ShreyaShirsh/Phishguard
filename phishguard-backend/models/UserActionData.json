@@ -1,0 +1,8 @@
+{
+    "userId": "123",
+    "category": "url",
+    "action": "answer",
+    "userAnswer": "safe",
+    "correct": false,
+    "timeTaken": 3
+}

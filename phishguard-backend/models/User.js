@@ -15,6 +15,11 @@ const userSchema = new mongoose.Schema({
         linksClicked: { type: Number, default: 0 },
         reportsSubmitted: { type: Number, default: 0 }
     },
+    categoryFails: { type: Object, default: {} },
+    badges: { type: Array, default: [] },
+    xp: { type: Number, default: 0 },
+    streak: { type: Number, default: 0 },
+    lastTrainingDate: { type: Date, default: null },
     trainings: {
         type: Array,
         default: [

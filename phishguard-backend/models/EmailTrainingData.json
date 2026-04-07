@@ -1,0 +1,40 @@
+[
+    {
+        "category": "email",
+        "email": {
+            "from": "IT Support <admin@yourcompany.com>",
+            "sub": "URGENT: Password Expiry Notification",
+            "content": "Your password expires in 2 hours. Click the link to verify."
+        },
+        "headers": [
+            {
+                "text": "Return-Path: hacker@evil.com",
+                "isMalicious": true,
+                "hint": "Sender domain mismatch"
+            },
+            {
+                "text": "From: admin@yourcompany.com",
+                "isMalicious": false
+            }
+        ]
+    },
+    {
+        "category": "email",
+        "email": {
+            "from": "CEO Office <ceo@company.com>",
+            "sub": "Urgent Wire Transfer",
+            "content": "Send money immediately to vendor."
+        },
+        "headers": [
+            {
+                "text": "SPF: FAIL",
+                "isMalicious": true,
+                "hint": "Unauthorized sender"
+            },
+            {
+                "text": "From: ceo@company.com",
+                "isMalicious": false
+            }
+        ]
+    }
+]

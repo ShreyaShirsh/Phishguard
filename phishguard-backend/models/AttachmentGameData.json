@@ -1,0 +1,12 @@
+[
+    {
+        "category": "attachment",
+        "fileName": "invoice.pdf.exe",
+        "safe": false
+    },
+    {
+        "category": "attachment",
+        "fileName": "report.pdf",
+        "safe": true
+    }
+]

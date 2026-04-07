@@ -495,6 +495,19 @@
                         </div>
                     </div>
                 </article>
+
+                <article class="panel" style="margin-top: 18px;">
+                    <h3>Global Leaderboard (Top 10)</h3>
+                    <div class="table" id="leaderboardTable">
+                        <div class="row header">
+                            <div>Name</div>
+                            <div style="text-align: right;">XP / Streak</div>
+                        </div>
+                        <div class="row">
+                            <div>Loading...</div>
+                        </div>
+                    </div>
+                </article>
             </section>
         </main>
     </div>
@@ -700,9 +713,39 @@
             }
         }
 
+        async function loadLeaderboard() {
+            try {
+                const res = await fetch("http://localhost:5000/leaderboard", {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const users = await res.json();
+                const lb = document.getElementById("leaderboardTable");
+                let html = `
+                    <div class="row header">
+                        <div>Name</div>
+                        <div style="text-align: right;">XP / Streak</div>
+                    </div>
+                `;
+                users.forEach(u => {
+                    html += `
+                    <div class="row">
+                        <div style="font-weight: 500;">${u.name} <span style="font-size: 0.75rem; color: #888;">${u.department || ''}</span></div>
+                        <div style="text-align: right; color: var(--cyber-blue);">${u.xp} XP &nbsp;<span style="color:var(--cyber-yellow);">🔥${u.streak}</span></div>
+                    </div>
+                    `;
+                });
+                lb.innerHTML = html;
+            } catch(e) {
+                console.error(e);
+            }
+        }
+
         // Fetch stats immediately, then every 3 seconds for real-time tracking
         fetchLiveStats();
         setInterval(fetchLiveStats, 3000);
+        
+        loadLeaderboard();
+        setInterval(loadLeaderboard, 10000);
 
         document.querySelectorAll(".menu button")[1].onclick = () => {
             window.location.href = "employees.html";

@@ -1,0 +1,251 @@
+<style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+        --pg-bg: #0d1117;
+        --pg-surface: #161b22;
+        --pg-border: #21262d;
+        --pg-cyan: #00e5c8;
+        --pg-text: #e6edf3;
+        --pg-muted: #7d8590;
+        --pg-red: #f85149;
+        --pg-green: #3fb950;
+        --font-sans: system-ui, -apple-system, sans-serif;
+        --font-mono: ui-monospace, SFMono-Regular, monospace;
+    }
+    body {
+        background: var(--pg-bg); color: var(--pg-text);
+        font-family: var(--font-sans); min-height: 100vh;
+        display: flex; flex-direction: column;
+    }
+    .topbar {
+        padding: 18px 24px; border-bottom: 1px solid var(--pg-border);
+        display: flex; align-items: center; justify-content: space-between;
+        background: var(--pg-surface);
+    }
+    .topbar-left h1 { font-size: 20px; font-weight: 500; color: var(--pg-amber); }
+    .topbar-left p { font-size: 13px; color: var(--pg-muted); margin-top: 4px; }
+    .btn-back {
+        background: transparent; border: 1px solid var(--pg-border);
+        color: var(--pg-text); padding: 8px 16px; border-radius: 6px;
+        cursor: pointer; font-size: 13px; text-decoration: none;
+    }
+    .btn-back:hover { background: rgba(255, 255, 255, 0.05); }
+
+    .main-content {
+        flex: 1; padding: 30px; display: flex; gap: 24px;
+        max-width: 1200px; margin: 0 auto; width: 100%; height: calc(100vh - 80px);
+    }
+
+    .panel {
+        background: var(--pg-surface); border: 1px solid var(--pg-border);
+        border-radius: 12px; display: flex; flex-direction: column;
+    }
+
+    .email-view { flex: 1; }
+    .headers-view { flex: 1; background: #010409; }
+
+    .panel-header {
+        padding: 14px 20px; border-bottom: 1px solid var(--pg-border);
+        font-size: 12px; font-weight: 500; text-transform: uppercase;
+        letter-spacing: 1px; color: var(--pg-muted);
+        display: flex; justify-content: space-between; align-items: center;
+    }
+
+    .email-body { padding: 24px; font-size: 14px; line-height: 1.6; }
+    .email-meta { margin-bottom: 20px; border-bottom: 1px solid var(--pg-border); padding-bottom: 20px; }
+    .meta-row { display: flex; margin-bottom: 8px; }
+    .meta-label { width: 60px; color: var(--pg-muted); font-weight: 500; }
+
+    .header-lines {
+        padding: 16px; overflow-y: auto; font-family: var(--font-mono);
+        font-size: 12px; color: var(--pg-muted); flex: 1;
+    }
+    
+    .h-line {
+        padding: 4px 8px; border-radius: 4px; margin-bottom: 2px;
+        cursor: pointer; transition: all 0.2s; word-wrap: break-word;
+    }
+
+    .h-line:hover { background: rgba(255,255,255,0.05); color: var(--pg-text); }
+    .h-line.selected-correct { background: rgba(63, 185, 80, 0.15); color: var(--pg-green); border-left: 3px solid var(--pg-green); }
+    .h-line.selected-wrong { background: rgba(248, 81, 73, 0.15); color: var(--pg-red); animation: shake 0.4s; }
+
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-4px); }
+        75% { transform: translateX(4px); }
+    }
+
+    .footer-action {
+        padding: 16px; border-top: 1px solid var(--pg-border);
+        text-align: right;
+    }
+
+    .btn-next {
+        background: rgba(210, 153, 34, 0.1); color: var(--pg-amber);
+        border: 1px solid var(--pg-amber); padding: 10px 24px;
+        border-radius: 6px; cursor: pointer; font-size: 14px; display: none;
+    }
+    .btn-next:hover { background: rgba(210, 153, 34, 0.2); }
+
+    .feedback-msg { font-size: 14px; display: inline-block; margin-right: 16px; font-weight: 500; }
+</style>
+
+<div class="topbar">
+    <div class="topbar-left">
+        <h1 style="color: var(--pg-amber);">Email Header Forensics</h1>
+        <p>Inspect the raw headers to find the mismatch that proves this email is spoofed.</p>
+    </div>
+    <a href="gamified_training.html" class="btn-back">← Back to Dashboard</a>
+</div>
+
+<div class="main-content">
+    <div class="panel email-view">
+        <div class="panel-header">Inbox Viewer <span id="levelLabel">Scenario 1</span></div>
+        <div class="email-body">
+            <div class="email-meta">
+                <div class="meta-row"><div class="meta-label">From:</div> <div id="e-from">IT Support &lt;admin@yourcompany.com&gt;</div></div>
+                <div class="meta-row"><div class="meta-label">To:</div> <div>Ramesh A. &lt;ramesh@yourcompany.com&gt;</div></div>
+                <div class="meta-row"><div class="meta-label">Subject:</div> <div id="e-sub" style="font-weight: 500;">URGENT: Password Expiry Notification</div></div>
+            </div>
+            <div id="e-content">
+                Hello Ramesh,<br><br>
+                Your Office365 password is set to expire in 2 hours. Please retain your current password by verifying your account at the portal below immediately.<br><br>
+                Failure to verify may result in a temporary lockout.<br><br>
+                Thanks,<br>IT Helpdesk
+            </div>
+        </div>
+    </div>
+
+    <div class="panel headers-view">
+        <div class="panel-header" style="border-bottom: 1px solid #30363d;">Raw Headers <span style="color:var(--pg-amber)">100 XP Bounty</span></div>
+        <div class="header-lines" id="headerContainer">
+            <!-- JS -->
+        </div>
+        <div class="footer-action">
+            <span class="feedback-msg" id="f-msg"></span>
+            <button class="btn-next" id="nextBtn" onclick="nextScenario()">Next Scenario →</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const scenarios = [
+        {
+            email: {
+                from: "IT Support &lt;admin@yourcompany.com&gt;",
+                sub: "URGENT: Password Expiry Notification",
+                content: "Hello Ramesh,<br><br>Your Office365 password is set to expire in 2 hours. Please retain your current password by verifying your account immediately.<br><br>Thanks,<br>IT Helpdesk"
+            },
+            headers: [
+                { text: "Return-Path: <bounces+admin=yourcompany.com@evil-hacker.net>", isMalicious: true, hint: "The Return-Path reveals the true sender domain (evil-hacker.net), mismatches the From address!" },
+                { text: "Received: from mail.evil-hacker.net (192.168.1.55)", isMalicious: false },
+                { text: "DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=evil-hacker.net;", isMalicious: false },
+                { text: "From: IT Support <admin@yourcompany.com>", isMalicious: false },
+                { text: "To: ramesh@yourcompany.com", isMalicious: false },
+                { text: "Subject: URGENT: Password Expiry Notification", isMalicious: false },
+                { text: "Date: Mon, 07 Apr 2026 14:02:00 +0000", isMalicious: false },
+                { text: "Message-ID: <12345@mail.evil-hacker.net>", isMalicious: false },
+                { text: "X-Mailer: MIME-tools 5.503 (Entity 5.501)", isMalicious: false }
+            ]
+        },
+        {
+            email: {
+                from: "CEO Office &lt;ceo@yourcompany.com&gt;",
+                sub: "Wire Transfer Requisition",
+                content: "Ramesh, I'm tied up in a board meeting. I need an urgent wire transfer processed to our new vendor. Please handle this quietly and quickly."
+            },
+            headers: [
+                { text: "Return-Path: <ceo@yourcompany.com>", isMalicious: false },
+                { text: "Received: from 104.22.x.x by yourcompany-mail.com", isMalicious: false },
+                { text: "Authentication-Results: spf=fail (sender IP is 104.22.x.x) smtp.mailfrom=yourcompany.com;", isMalicious: true, hint: "SPF Fail! The sender's IP is not authorized to send emails on behalf of yourcompany.com." },
+                { text: "DKIM-Signature: v=1; a=rsa-sha256; d=yourcompany.com; s=selector1; (invalid)", isMalicious: false },
+                { text: "From: CEO Office <ceo@yourcompany.com>", isMalicious: false },
+                { text: "To: ramesh@yourcompany.com", isMalicious: false },
+                { text: "Subject: Wire Transfer Requisition", isMalicious: false },
+                { text: "X-Priority: 1 (Highest)", isMalicious: false }
+            ]
+        }
+    ];
+
+    let currentIdx = 0;
+    let roundFinished = false;
+    let totalXp = 0;
+
+    function render() {
+        roundFinished = false;
+        document.getElementById('nextBtn').style.display = 'none';
+        document.getElementById('f-msg').textContent = '';
+        document.getElementById('levelLabel').textContent = `Scenario ${currentIdx + 1} of ${scenarios.length}`;
+        
+        const s = scenarios[currentIdx];
+        document.getElementById('e-from').innerHTML = s.email.from;
+        document.getElementById('e-sub').innerHTML = s.email.sub;
+        document.getElementById('e-content').innerHTML = s.email.content;
+
+        const hc = document.getElementById('headerContainer');
+        hc.innerHTML = '';
+        s.headers.forEach(h => {
+            const div = document.createElement('div');
+            div.className = 'h-line';
+            div.textContent = h.text;
+            div.onclick = () => checkLine(h, div);
+            hc.appendChild(div);
+        });
+    }
+
+    function checkLine(headerData, element) {
+        if (roundFinished) return;
+        
+        if (headerData.isMalicious) {
+            element.classList.add('selected-correct');
+            document.getElementById('f-msg').innerHTML = `<span style="color:var(--pg-green);">Correct!</span> ${headerData.hint}`;
+            document.getElementById('nextBtn').style.display = 'inline-block';
+            roundFinished = true;
+            totalXp += 100;
+            
+            if (currentIdx === scenarios.length - 1) {
+                document.getElementById('nextBtn').textContent = 'Finish Module';
+            }
+        } else {
+            element.classList.add('selected-wrong');
+            document.getElementById('f-msg').innerHTML = `<span style="color:var(--pg-red);">Nope.</span> That header looks normal. Keep searching.`;
+            setTimeout(() => { element.classList.remove('selected-wrong'); }, 500);
+            totalXp = Math.max(0, totalXp - 10);
+        }
+    }
+
+    async function finishModule(xpEarned) {
+        const token = localStorage.getItem('token');
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (token && user) {
+            try {
+                await fetch(`http://localhost:5000/employee/${user.email}/gamified-complete`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ moduleId: 'email', xpEarned: xpEarned, passed: xpEarned > 0 })
+                });
+            } catch (e) {
+                console.error(e);
+            }
+        }
+    }
+
+    async function nextScenario() {
+        if (currentIdx < scenarios.length - 1) {
+            currentIdx++;
+            render();
+        } else {
+            document.getElementById('headerContainer').innerHTML = `<div style="padding: 20px; color: var(--pg-green); font-size: 16px;">Training Complete! You earned ${totalXp} XP. Saving...</div>`;
+            document.getElementById('nextBtn').style.display = 'none';
+            document.getElementById('f-msg').textContent = '';
+            
+            await finishModule(totalXp);
+            setTimeout(() => {
+                window.location.href = 'gamified_training.html';
+            }, 2000);
+        }
+    }
+
+    render();
+</script>

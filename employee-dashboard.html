@@ -401,7 +401,7 @@
         </div>
         <nav class="menu">
             <button id="btnOverview" class="active" onclick="switchTab('overview')">Overview</button>
-            <button id="btnTraining" onclick="switchTab('training')">Training Lab</button>
+            <button id="btnTraining" onclick="window.location.href='gamified_training.html'">Gamified Training</button>
             <button id="btnSimulations" onclick="switchTab('simulations')">Simulations</button>
             <button class="logout" onclick="logout()">Logout</button>
         </nav>
@@ -431,17 +431,16 @@
                     </ul>
                 </div>
             </div>
+
+            <div class="panel" style="margin-top: 20px;">
+                <h3 style="color: var(--cyber-yellow);">Top Performers</h3>
+                <div id="leaderboardList" style="margin-top: 15px; display: grid; gap: 10px;">
+                    <p style="font-size: 0.8rem; color: #888; padding: 10px;">Loading leaderboard...</p>
+                </div>
+            </div>
         </div>
 
-        <div id="tab-training" class="tab-content">
-             <div class="panel">
-                 <h3>Training Lab</h3>
-                 <p style="color: rgba(232, 244, 248, 0.7);">Complete interactive modules to lower your risk score.</p>
-                 <div class="training-grid" id="trainingLabGrid">
-                     <p style="color: rgba(232, 244, 248, 0.7); padding: 10px;">Loading modules...</p>
-                 </div>
-             </div>
-        </div>
+
 
         <div id="tab-simulations" class="tab-content">
              <div class="panel">
@@ -454,16 +453,7 @@
         </div>
     </main>
 
-    <!-- Quiz Modal -->
-    <div class="modal-overlay" id="quizModal">
-        <div class="modal-card">
-            <h2 id="quizTitle">Training Module</h2>
-            <p id="quizQuestion">Loading scenario...</p>
-            <div class="quiz-options" id="quizOptions">
-            </div>
-            <button class="btn-action" onclick="closeQuiz()" style="background: rgba(255,0,85,0.1); color: var(--cyber-red); border: 1px solid var(--cyber-red); margin-top: 15px;">Cancel Training</button>
-        </div>
-    </div>
+
 
     <script>
         // Load user data to prevent lockouts and setup profile
@@ -526,7 +516,6 @@
                     // Render dynamic lists based on deep User schema
                     if (user.trainings) {
                         renderAssignedTrainings(user.trainings);
-                        renderTrainingLab(user.trainings);
                     }
 
                 } catch (err) {
@@ -570,7 +559,7 @@
                 if (t.status === 'completed') {
                     actionHtml = `<span style="color: var(--cyber-green); font-size: 0.9rem;">✓ Pass (${t.score}%)</span>`;
                 } else {
-                    actionHtml = `<button class="btn-start" onclick="switchTab('training')">Start</button>`;
+                    actionHtml = `<button class="btn-start" onclick="window.location.href='gamified_training.html'">Start</button>`;
                 }
 
                 item.innerHTML = `
@@ -584,30 +573,7 @@
             });
         }
 
-        function renderTrainingLab(trainings) {
-            const grid = document.getElementById('trainingLabGrid');
-            grid.innerHTML = '';
-            
-            if (!trainings || trainings.length === 0) {
-                grid.innerHTML = '<p>No training modules found.</p>';
-                return;
-            }
 
-            trainings.forEach(t => {
-                const card = document.createElement('div');
-                card.className = 'training-card';
-                card.innerHTML = `
-                    <h4>${t.name}</h4>
-                    <p><strong>Difficulty:</strong> ${(t.difficulty ? t.difficulty : 'standard').charAt(0).toUpperCase() + (t.difficulty ? t.difficulty : 'standard').slice(1)} | <strong>Type:</strong> ${(t.type ? t.type : 'module').toUpperCase()}</p>
-                    <p style="font-size: 0.8rem; color: #888; margin-bottom: 15px;">Duration: ${t.duration || '10 min'} ${t.isMandatory ? '| <span style="color:var(--cyber-orange)">Mandatory</span>' : ''}</p>
-                    ${t.status === 'completed' 
-                        ? `<div style="text-align:center; padding: 10px; color: var(--cyber-green); border: 1px solid var(--cyber-green); border-radius: 8px;">Completed (Score: ${t.score}%)</div>`
-                        : `<button class="btn-action" onclick="openQuiz('${t.id}', '${t.name}')">Start ${t.type === 'simulation' ? 'Simulation' : 'Module'}</button>`
-                    }
-                `;
-                grid.appendChild(card);
-            });
-        }
 
         /* --- API INTEGRATIONS --- */
         async function fetchInbox() {
@@ -634,8 +600,8 @@
                             <p>From: security-alert@internal.system | Subject: ${camp.campaignName}</p>
                         </div>
                         <div class="email-actions">
-                            <button class="btn-report" onclick="logSimulation(true, this)">Report</button>
-                            <button class="btn-click" onclick="logSimulation(false, this)">Read/Click</button>
+                            <button class="btn-report" onclick="logSimulation(true, '${camp._id}', this)">Report</button>
+                            <button class="btn-click" onclick="logSimulation(false, '${camp._id}', this)">Read/Click</button>
                         </div>
                     `;
                     inboxList.appendChild(el);
@@ -645,7 +611,7 @@
             }
         }
 
-        async function logSimulation(reported, btnElement) {
+        async function logSimulation(reported, campaignId, btnElement) {
             try {
                 const res = await fetch(`http://localhost:5000/employee/${localUser.email}/simulation`, {
                     method: 'POST',
@@ -653,7 +619,7 @@
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
                     },
-                    body: JSON.stringify({ reported })
+                    body: JSON.stringify({ reported, campaignId })
                 });
                 const data = await res.json();
                 
@@ -663,7 +629,11 @@
                     item.classList.add('safe');
                     item.querySelector('.email-actions').innerHTML = '<span style="color:var(--cyber-green);">Reported Safe</span>';
                 } else {
-                    alert("Warning! You clicked a suspicious link. You fell for phishing. ❌ Risk Score Penalized!");
+                    let alertMsg = "Warning! You clicked a suspicious link. You fell for phishing. ❌ Risk Score Penalized!";
+                    if (data.assignedTraining) {
+                        alertMsg += `\n\nBased on your failure, you have been automatically assigned a new training module: [${data.assignedTraining}]!`;
+                    }
+                    alert(alertMsg);
                     const item = btnElement.closest('.email-item');
                     item.classList.add('risk');
                     item.querySelector('.email-actions').innerHTML = '<span style="color:var(--cyber-red);">Bait Clicked</span>';
@@ -679,69 +649,38 @@
             }
         }
 
-        /* --- TRAINING LAB --- */
-        let currentActiveModule = '';
-
-        function openQuiz(moduleId, moduleName) {
-            currentActiveModule = moduleId;
-            const modal = document.getElementById('quizModal');
-            
-            document.getElementById('quizTitle').innerText = moduleName;
-            document.getElementById('quizQuestion').innerText = 'Based on the rigorous learning materials just presented to you, how would you score your understanding of this interactive module?';
-            
-            const optionsContainer = document.getElementById('quizOptions');
-            optionsContainer.innerHTML = '';
-            
-            // Generate mock performance score choices
-            const choices = [
-                { text: 'Complete Mastery (Score: 100)', score: 100 },
-                { text: 'Strong Understanding (Score: 75)', score: 75 },
-                { text: 'Needs Improvement (Score: 40)', score: 40 },
-                { text: 'Failed Module (Score: 0)', score: 0 }
-            ];
-
-            choices.forEach(opt => {
-                const btn = document.createElement('div');
-                btn.className = 'quiz-opt';
-                btn.innerText = opt.text;
-                btn.onclick = () => submitTraining(opt.score);
-                optionsContainer.appendChild(btn);
-            });
-
-            modal.style.display = 'flex';
-        }
-
-        function closeQuiz() {
-            document.getElementById('quizModal').style.display = 'none';
-        }
-
-        async function submitTraining(performanceScore) {
-            closeQuiz();
+        async function loadLeaderboard() {
             try {
-                const res = await fetch(`http://localhost:5000/employee/${localUser.email}/complete-training`, {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ moduleId: currentActiveModule, performanceScore })
+                const res = await fetch("http://localhost:5000/leaderboard", {
+                    headers: { 'Authorization': `Bearer ${token}` }
                 });
-                
-                const data = await res.json();
-                
-                if (data.newScore !== undefined) {
-                    alert(`Training Logged ✅! Performance Score: ${performanceScore}%. Native Risk Reduced by: ${data.riskReduction} points.`);
-                    document.getElementById("riskScoreDisplay").innerText = data.newScore;
-                    const circle = document.getElementById("riskScoreDisplay").parentElement;
-                    circle.style.boxShadow = "0 0 40px var(--cyber-green)";
-                    switchTab('overview');
-                } else {
-                    alert("Error saving training.");
-                }
-            } catch (err) {
-                console.error("Failed to execute training completion", err);
+                const users = await res.json();
+                const lb = document.getElementById("leaderboardList");
+                let html = '';
+                users.forEach((u, idx) => {
+                    let medal = '';
+                    if (idx === 0) medal = '🥇 ';
+                    else if (idx === 1) medal = '🥈 ';
+                    else if (idx === 2) medal = '🥉 ';
+                    else medal = `<span style="display:inline-block; width:22px; text-align:center;">${idx+1}.</span>`;
+                    
+                    html += `
+                    <div style="background: rgba(10, 14, 23, 0.6); padding: 12px 15px; border-radius: 8px; border: 1px solid rgba(0, 217, 255, 0.1); display: flex; justify-content: space-between;">
+                        <div style="font-family: 'Orbitron', sans-serif;">${medal} &nbsp;${u.name} <span style="font-size: 0.75rem; color: #888; font-family:'Red Hat Display', sans-serif;">${u.department || ''}</span></div>
+                        <div style="color: var(--cyber-blue); font-weight: bold;">${u.xp} XP &nbsp;<span style="color:var(--cyber-yellow);">🔥${u.streak}</span></div>
+                    </div>
+                    `;
+                });
+                lb.innerHTML = html;
+            } catch(e) {
+                console.error(e);
             }
         }
+
+        loadLeaderboard();
+        setInterval(loadLeaderboard, 10000);
+
+
 
         function logout() {
             localStorage.removeItem("user");

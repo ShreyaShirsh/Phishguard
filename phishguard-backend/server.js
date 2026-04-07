@@ -25,6 +25,7 @@ const verifyToken = (req, res, next) => {
 
 const User = require("./models/User");
 const Campaign = require("./models/campaign");
+const { UrlChallenge, EmailChallenge, AttachmentChallenge, SocialChallenge, UserAction } = require("./models/TrainingData");
 
 mongoose.connect("mongodb://127.0.0.1:27017/phishguard")
 .then(() => console.log("MongoDB Connected ✅"))
@@ -79,7 +80,7 @@ app.post("/login", async (req, res) => {
 app.post("/campaign", verifyToken, async (req, res) => {
     try {
         if (req.user.role !== "admin") return res.status(403).json({ error: "Access Denied: Admin Only ❌" });
-        const { campaignName, template, department, createdBy } = req.body;
+        const { campaignName, template, category, department, createdBy } = req.body;
         
         let targetedEmployees = 0;
         if (department === "All" || !department) {
@@ -91,6 +92,7 @@ app.post("/campaign", verifyToken, async (req, res) => {
         const newCampaign = new Campaign({
             campaignName,
             template,
+            category: category || "General",
             department: department || "All",
             createdBy,
             targetedEmployees
@@ -313,18 +315,91 @@ app.post("/employee/:email/complete-training", verifyToken, async (req, res) => 
     }
 });
 
+// 🔥 GAMIFIED TRAINING COMPLETE (XP & STREAK)
+app.post("/employee/:email/gamified-complete", verifyToken, async (req, res) => {
+    try {
+        if (req.user.role !== "admin" && req.user.email !== req.params.email) return res.status(403).json({ error: "Access Denied ❌" });
+        const { moduleId, xpEarned, passed } = req.body;
+        
+        const employee = await User.findOne({ email: req.params.email, role: "employee" });
+        if(!employee) return res.status(404).json({ error: "Employee not found ❌" });
+
+        // Update XP
+        employee.xp = (employee.xp || 0) + (xpEarned || 0);
+
+        // Update Streak
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+        
+        let lastDate = 0;
+        if (employee.lastTrainingDate) {
+            const ld = new Date(employee.lastTrainingDate);
+            lastDate = new Date(ld.getFullYear(), ld.getMonth(), ld.getDate()).getTime();
+        }
+
+        const msInDay = 86400000;
+        const diffDays = Math.round((today - lastDate) / msInDay);
+
+        if (diffDays === 1) {
+            employee.streak = (employee.streak || 0) + 1;
+        } else if (diffDays > 1) {
+            employee.streak = 1; // Streak broken, restart
+        } else if (diffDays === 0 && !employee.streak) {
+            employee.streak = 1; // First training ever for the day
+        }
+        
+        employee.lastTrainingDate = now;
+
+        // Reduce risk score slightly based on XP
+        if (passed) {
+            const riskReduction = Math.floor((xpEarned || 0) / 50);
+            employee.riskScore = Math.max(0, employee.riskScore - riskReduction);
+            
+            if (!employee.trainings) employee.trainings = [];
+            const tIndex = employee.trainings.findIndex(t => t.id === moduleId);
+            if (tIndex >= 0) {
+                employee.trainings[tIndex].status = "completed";
+                employee.trainings[tIndex].completedAt = now.toISOString();
+                employee.markModified("trainings");
+            }
+        }
+
+        await employee.save();
+
+        res.json({ 
+            message: "Module Completed ✅", 
+            xp: employee.xp, 
+            streak: employee.streak, 
+            riskScore: employee.riskScore 
+        });
+    } catch(err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+
 // 🔥 SIMULATION INBOX ACTIONS
 app.post("/employee/:email/simulation", verifyToken, async (req, res) => {
     try {
         if (req.user.role !== "admin" && req.user.email !== req.params.email) return res.status(403).json({ error: "Access Denied ❌" });
-        const { reported } = req.body; 
+        const { reported, campaignId } = req.body; 
         const employee = await User.findOne({ email: req.params.email, role: "employee" });
         if(!employee) return res.status(404).json({ error: "Employee not found ❌" });
         
-        if (!employee.phishingStats) employee.phishingStats = { emailsReceived: 0, linksClicked: 0, reportsSubmitted: 0 };
+        let targetCategory = "General";
+        if (campaignId) {
+            const campaign = await Campaign.findById(campaignId);
+            if (campaign && campaign.category) {
+                targetCategory = campaign.category;
+            }
+        }
         
+        if (!employee.phishingStats) employee.phishingStats = { emailsReceived: 0, linksClicked: 0, reportsSubmitted: 0 };
+        if (!employee.categoryFails) employee.categoryFails = {};
+
         employee.phishingStats.emailsReceived += 1;
         let scoreChange = 0;
+        let assignedModule = null;
         
         if (reported) {
             employee.phishingStats.reportsSubmitted += 1;
@@ -332,11 +407,40 @@ app.post("/employee/:email/simulation", verifyToken, async (req, res) => {
         } else {
             employee.phishingStats.linksClicked += 1;
             scoreChange = 15;
+            
+            // Track Category Fail
+            employee.categoryFails[targetCategory] = (employee.categoryFails[targetCategory] || 0) + 1;
+            employee.markModified('categoryFails');
+
+            // Auto-assign training based on category
+            const categoryMapping = {
+                "Financial": "phishing_detection",
+                "HR": "social_engineering",
+                "Delivery": "safe_browsing",
+                "Cloud": "password_hygiene",
+                "Security": "incident_response",
+                "General": "email_scrutiny"
+            };
+            
+            const moduleId = categoryMapping[targetCategory] || "email_scrutiny";
+            if (!employee.trainings) employee.trainings = [];
+            
+            const tIndex = employee.trainings.findIndex(t => t.id === moduleId);
+            if (tIndex >= 0) {
+                employee.trainings[tIndex].status = "pending"; // Re-assign if completed
+                employee.markModified('trainings');
+                assignedModule = employee.trainings[tIndex].name;
+            }
         }
         
         employee.riskScore = Math.max(0, Math.min(100, employee.riskScore + scoreChange));
         await employee.save();
-        res.json({ message: "Simulation logged ✅", newScore: employee.riskScore, stats: employee.phishingStats });
+        res.json({ 
+            message: "Simulation logged ✅", 
+            newScore: employee.riskScore, 
+            stats: employee.phishingStats,
+            assignedTraining: assignedModule
+        });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -364,6 +468,107 @@ app.post("/admin/assign-training", verifyToken, async (req, res) => {
         await employee.save();
         res.json({ message: "Training Assigned ✅", trainings: employee.trainings });
     } catch(err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// 🔥 FETCH LEADERBOARD
+app.get("/leaderboard", verifyToken, async (req, res) => {
+    try {
+        const users = await User.find({ role: "employee" })
+            .select("name department xp streak badges riskScore")
+            .sort({ xp: -1 })
+            .limit(10);
+        res.json(users);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// 🔥 FETCH DYNAMIC TRAINING CHALLENGES
+app.get("/training/modules/:category", verifyToken, async (req, res) => {
+    try {
+        let data;
+        switch(req.params.category) {
+            case "url": 
+                data = await UrlChallenge.find(); 
+                break;
+            case "email": 
+                data = await EmailChallenge.find(); 
+                break;
+            case "attachment": 
+                data = await AttachmentChallenge.find(); 
+                break;
+            case "social": 
+                data = await SocialChallenge.findOne(); 
+                break;
+            default:
+                return res.status(400).json({ error: "Invalid category ❌" });
+        }
+        res.json(data);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// 🔥 SUBMIT DYNAMIC TRAINING ACTION
+app.post("/training/action", verifyToken, async (req, res) => {
+    try {
+        const { category, action, userAnswer, correct, timeTaken } = req.body;
+        const employee = await User.findById(req.user.id);
+        
+        if (!employee) return res.status(404).json({ error: "Employee not found ❌" });
+
+        // Record UserAction
+        const newAction = new UserAction({
+            userId: employee._id,
+            category,
+            action,
+            userAnswer,
+            correct,
+            timeTaken
+        });
+        await newAction.save();
+
+        // Calculate XP logic
+        let xpGained = 0;
+        let riskReduction = 0;
+        if (correct) {
+            xpGained = 50; // standard base
+            if (timeTaken < 5) xpGained += 10; // speed bonus
+            riskReduction = 2; // reduce risk slightly
+        } else {
+            riskReduction = -1; // penalty
+        }
+
+        employee.xp += xpGained;
+        
+        // Update streak logic: if last training was > 24 hrs ago but < 48 hrs, increment. else set to 1.
+        const now = new Date();
+        const lastDate = employee.lastTrainingDate || new Date(now.getTime() - 8640000000); // long time ago
+        const diffHours = Math.abs(now - lastDate) / 36e5;
+        
+        if (diffHours < 24) {
+            // Already trained today, do nothing to streak
+        } else if (diffHours < 48) {
+            employee.streak += 1;
+        } else {
+            employee.streak = 1;
+        }
+        
+        employee.lastTrainingDate = now;
+        employee.riskScore = Math.max(0, Math.min(100, employee.riskScore - riskReduction));
+
+        await employee.save();
+
+        res.json({
+            message: "Action recorded ✅",
+            xp: employee.xp,
+            streak: employee.streak,
+            riskScore: employee.riskScore,
+            xpEarned: xpGained
+        });
+    } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
